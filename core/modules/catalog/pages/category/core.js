@@ -6,7 +6,6 @@ import generateSchemaOrg from '@core_modules/catalog/helpers/schema.org';
 import dynamic from 'next/dynamic';
 import Content from '@core_modules/catalog/pages/category/components';
 import Backdrop from '@common/Backdrop';
-import { getCmsBlocks } from '@core_modules/theme/services/graphql';
 
 const ErrorView = dynamic(() => import('@core_modules/error/pages/default'), { ssr: false });
 
@@ -18,11 +17,7 @@ const Page = (props) => {
         productSize: configStore?.pwa?.page_size || 10,
         id: categoryId,
     });
-    //
     const { data: dataConfig } = getPwaConfig();
-    const { data: cmsBlockData, loading: cmsBlockLoading, error: cmsBlockError } = getCmsBlocks({ identifiers: ['pretest-block'] });
-    const cmsBlockContent = cmsBlockData?.cmsBlocks?.items[0]?.content;
-    // console.log('masuk sini, ', cmsBlockData, cmsBlockLoading);
     const storeConfig = dataConfig?.storeConfig || configStore;
     let config = {
         ...pageConfig,
@@ -70,7 +65,7 @@ const Page = (props) => {
     }
     return (
         <Layout {...props} pageConfig={config} data={null} isPlp>
-            <Content categoryId={categoryId} data={data} {...other} storeConfig={storeConfig} cmsBlockContent={cmsBlockContent} />
+            <Content categoryId={categoryId} data={data} {...other} storeConfig={storeConfig} />
         </Layout>
     );
 };

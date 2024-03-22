@@ -26,7 +26,7 @@ const categoryTabs = (category) => {
     }
     return data;
 };
-const CategoryPage = ({ data, storeConfig, t, cmsBlockContent, ...other }) => {
+const CategoryPage = ({ data, storeConfig, t, ...other }) => {
     // const [value] = React.useState(0);
     const categoryList = data?.categoryList[0];
 
@@ -156,9 +156,6 @@ const CategoryPage = ({ data, storeConfig, t, cmsBlockContent, ...other }) => {
                         {...other}
                     />
                 )}
-                <Show when={cmsBlockContent}>
-                    <div dangerouslySetInnerHTML={{ __html: cmsBlockContent }} />
-                </Show>
             </div>
         </>
     );

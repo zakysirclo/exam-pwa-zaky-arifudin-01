@@ -82,24 +82,15 @@ const WidgetRenderer = (props) => {
      */
     /* eslint-disable */
     const WidgetComponent = () => {
-        if (widgetContent.includes('arrow-right-circle-icon')) {
-            console.log('masuk widgetContent', { widgetContent, content });
-        }
         return parse(widgetContent, {
             replace: (domNode) => {
                 if (skipTags.length > 0 && skipTags.some((tag) => tag === domNode.name)) {
                     return <span />;
                 }
                 if (domNode.name === 'img') {
-                    if (widgetContent.includes('arrow-right-circle-icon')) {
-                        console.log('masuk widgetContent1', widgetContent);
-                    }
                     return <ImageRenderer storeConfig={storeConfig} domNode={domNode} />;
                 }
                 if (domNode.name === 'a' && domNode.attribs?.href) {
-                    if (widgetContent.includes('arrow-right-circle-icon')) {
-                        console.log('masuk widgetContent2', widgetContent);
-                    }
                     return <LinkRenderer domNode={domNode} />;
                 }
 
