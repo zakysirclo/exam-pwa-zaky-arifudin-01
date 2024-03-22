@@ -41,7 +41,7 @@ package-lock.json
 /generated/availableStores.json
 
 #project files
-src
+#src
 
 #key
 /.github
