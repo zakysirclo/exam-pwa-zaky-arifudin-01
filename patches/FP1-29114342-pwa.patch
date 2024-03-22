@@ -1,0 +1,1221 @@
+From 385efb4df779009a1c1f0621ff936f30518974fb Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Thu, 30 Mar 2023 11:51:23 +0700
+Subject: [PATCH] REVERT([29114342] PWA - config):revert pwa config cache
+
+---
+ core/api/graphql/resolver/index.js            |   6 -
+ .../resolver/internalGetAvailableStores.js    |  14 -
+ .../graphql/resolver/internalGetCurrency.js   |  14 -
+ .../api/graphql/schema/createCustomerToken.js |  23 -
+ core/api/rest/config/generateconfig.js        | 283 ------------
+ core/api/rest/config/index.js                 |  64 ---
+ core/api/rest/setting/generatesetting.js      |  86 ----
+ core/api/rest/setting/index.js                |  27 --
+ .../setting/components/currency/index.js      |  10 +-
+ .../setting/components/language/index.js      |   6 +-
+ .../setting/services/graphql/schema.js        |   4 +-
+ core/modules/slug/index.js                    |   5 +-
+ core/modules/theme/pages/_app.js              |   3 +-
+ core/services/graphql/schema/config.js        | 431 +++++++++---------
+ generated/readme.md                           |   2 -
+ server.js                                     |   9 -
+ 16 files changed, 238 insertions(+), 749 deletions(-)
+ delete mode 100644 core/api/graphql/resolver/internalGetAvailableStores.js
+ delete mode 100644 core/api/graphql/resolver/internalGetCurrency.js
+ delete mode 100644 core/api/rest/config/generateconfig.js
+ delete mode 100644 core/api/rest/config/index.js
+ delete mode 100644 core/api/rest/setting/generatesetting.js
+ delete mode 100644 core/api/rest/setting/index.js
+ delete mode 100644 generated/readme.md
+
+diff --git a/core/api/graphql/resolver/index.js b/core/api/graphql/resolver/index.js
+index 0426af451..22830eaa3 100644
+--- a/core/api/graphql/resolver/index.js
++++ b/core/api/graphql/resolver/index.js
+@@ -9,8 +9,6 @@ const internalGenerateSession = require('./internalGenerateSession');
+ const internalDeleteSession = require('./internalDeleteSession');
+ const internalCreateSocialLogin = require('./internalCreateSocialLogin');
+ const internalGetInstagramFeed = require('./internalGetInstagramFeed');
+-const internalGetCurrency = require('./internalGetCurrency');
+-const internalGetAvailableStores = require('./internalGetAvailableStores');
+ 
+ const resolver = {
+     Mutation: {
+@@ -25,10 +23,6 @@ const resolver = {
+         internalCreateSocialLogin,
+         internalGetInstagramFeed,
+     },
+-    Query: {
+-        internalGetCurrency,
+-        internalGetAvailableStores,
+-    },
+ };
+ 
+ module.exports = resolver;
+diff --git a/core/api/graphql/resolver/internalGetAvailableStores.js b/core/api/graphql/resolver/internalGetAvailableStores.js
+deleted file mode 100644
+index 475018997..000000000
+--- a/core/api/graphql/resolver/internalGetAvailableStores.js
++++ /dev/null
+@@ -1,14 +0,0 @@
+-/* eslint-disable eqeqeq */
+-/* eslint-disable no-restricted-syntax */
+-const requestInternal = require('../../rest/request');
+-
+-const internalGetAvailableStores = async () => {
+-    let result;
+-    const dataStores = await requestInternal('getSetting?field=availableStores');
+-    if (dataStores) {
+-        result = dataStores.availableStores;
+-    }
+-    return result;
+-};
+-
+-module.exports = internalGetAvailableStores;
+diff --git a/core/api/graphql/resolver/internalGetCurrency.js b/core/api/graphql/resolver/internalGetCurrency.js
+deleted file mode 100644
+index 471e0205d..000000000
+--- a/core/api/graphql/resolver/internalGetCurrency.js
++++ /dev/null
+@@ -1,14 +0,0 @@
+-/* eslint-disable eqeqeq */
+-/* eslint-disable no-restricted-syntax */
+-const requestInternal = require('../../rest/request');
+-
+-const internalGetCurrency = async () => {
+-    let result;
+-    const dataCurrency = await requestInternal('getSetting?field=currency');
+-    if (dataCurrency) {
+-        result = dataCurrency.currency;
+-    }
+-    return result;
+-};
+-
+-module.exports = internalGetCurrency;
+diff --git a/core/api/graphql/schema/createCustomerToken.js b/core/api/graphql/schema/createCustomerToken.js
+index 85c1633de..661905222 100644
+--- a/core/api/graphql/schema/createCustomerToken.js
++++ b/core/api/graphql/schema/createCustomerToken.js
+@@ -6,31 +6,8 @@ type Token {
+     is_email_confirmation: Boolean
+ }
+ 
+-type ExchangeRate {
+-    currency_to: String
+-    rate: Float
+-}
+-
+-type Currency {
+-    base_currency_code: String
+-    base_currency_symbol: String
+-    default_display_currency_code: String
+-    default_display_currency_symbol: String
+-    available_currency_codes: [String]
+-    exchange_rates: [ExchangeRate]
+-}
+-
+-type Stores {
+-    store_code: ID
+-    store_name: String
+-    locale: String
+-    is_default_store: Boolean
+-}
+-
+ type Query {
+     getCustomerToken: Token
+-    internalGetCurrency: Currency
+-    internalGetAvailableStores: [Stores]
+ }
+ 
+ type RevokeCustomerTokenOutput {
+diff --git a/core/api/rest/config/generateconfig.js b/core/api/rest/config/generateconfig.js
+deleted file mode 100644
+index 9805c0abc..000000000
+--- a/core/api/rest/config/generateconfig.js
++++ /dev/null
+@@ -1,283 +0,0 @@
+-#! /usr/bin/env node
+-/* eslint-disable eqeqeq */
+-/* eslint-disable no-restricted-syntax */
+-const fs = require('fs');
+-const path = require('path');
+-const { dirname } = require('path');
+-const { GraphQLClient, gql } = require('graphql-request');
+-const { graphqlEndpoint } = require('../../../../swift.config');
+-const { getAppEnv, getAccessEnv, getEncryptEnv } = require('../../../helpers/env');
+-
+-const { generateSetting } = require('../setting/generatesetting');
+-
+-// urlpath for json file
+-const myRoot = dirname(require.main.filename);
+-const baseDir = path.join(myRoot, 'generated/');
+-
+-const appEnv = getAppEnv();
+-
+-const graphQLClient = new GraphQLClient(`${graphqlEndpoint[appEnv] || graphqlEndpoint.prod}`, {
+-    method: 'GET',
+-    headers: {
+-        Authorization: `Bearer ${getAccessEnv()}`,
+-        'Content-Type': 'application/json',
+-    },
+-    jsonSerializer: {
+-        parse: JSON.parse,
+-        stringify: JSON.stringify,
+-    },
+-});
+-
+-const reqBody = gql`{
+-    storeConfig {
+-    cms_page
+-    pwa {
+-        use_cms_page_enable
+-        use_cms_page_identifier
+-        banner_slider_enable
+-        banner_slider_title
+-        category_list_enable
+-        category_list_url_key            
+-        category_list_image_size_desktop_height
+-        category_list_image_size_desktop_width
+-        category_list_image_size_mobile_height
+-        category_list_image_size_mobile_width
+-        features_product_enable
+-        features_product_url_key
+-        use_cms_page_enable
+-        use_cms_page_identifier
+-        banner_slider_enable
+-        banner_slider_title
+-        category_list_enable
+-        category_list_url_key            
+-        category_list_image_size_desktop_height
+-        category_list_image_size_desktop_width
+-        category_list_image_size_mobile_height
+-        category_list_image_size_mobile_width
+-        features_product_enable
+-        features_product_url_key
+-        add_to_cart_enable
+-        app_name
+-        cms_contact_identifiers
+-        cms_social_media_link_identifer
+-        configurable_options_enable
+-        custom_install_app_enable
+-        default_robot
+-        drawer_filter_on_desktop_enable
+-        enabler_footer_mobile
+-        enabler_sticky_header
+-        facebook_app_id
+-        facebook_meta_id_app_id
+-        facebook_meta_id_enable
+-        footer_version
+-        header_version
+-        home_slider_desktop_height
+-        home_slider_desktop_width
+-        home_slider_mobile_height
+-        home_slider_mobile_width
+-        icon_apple_touch
+-        image_category_height
+-        image_category_width
+-        image_product_height
+-        image_product_width
+-        thumbor_enable
+-        thumbor_https_http
+-        thumbor_url
+-        install_message
+-        label_enable
+-        label_new_enable
+-        label_sale_enable
+-        label_weltpixel_enable
+-        magezon_slider_desktop_height
+-        magezon_slider_desktop_width
+-        magezon_slider_mobile_height
+-        magezon_slider_mobile_width
+-        mobile_navigation
+-        page_size
+-        paypal_debug
+-        paypal_enable
+-        paypal_merchant_id
+-        popup_detail_image_enable
+-        promo_banner_lite_after_width
+-        promo_banner_lite_label_width
+-        promo_banner_lite_top_width
+-        quick_view_enable
+-        rating_enable
+-        recaptcha_contact_enable
+-        recaptcha_enable
+-        recaptcha_login_enable
+-        recaptcha_register_enable
+-        recaptcha_server_key_dev
+-        recaptcha_server_key_local
+-        recaptcha_server_key_prod
+-        recaptcha_server_key_stage
+-        recaptcha_site_key_dev
+-        recaptcha_site_key_local
+-        recaptcha_site_key_prod
+-        recaptcha_site_key_stage
+-        remove_decimal_price_enable
+-        share_icon_email
+-        share_icon_facebook
+-        share_icon_line
+-        share_icon_linkedin
+-        share_icon_pinterest
+-        share_icon_telegram
+-        share_icon_twitter
+-        ves_menu_alias
+-        ves_menu_enable
+-        primary_color
+-        secondary_color
+-        background_color
+-        error_color
+-        warning_msg_color
+-        success_msg_color
+-        font_color
+-        default_font
+-        heading_font
+-        button_background_color
+-        button_background_hover_color
+-        button_disabled_background_color
+-        button_text_color
+-        button_text_hover_color
+-        button_disabled_text_color
+-        button_border_color
+-        button_border_hover_color
+-        link_color
+-        link_hover_color
+-        link_font_decoration
+-        link_font_hover_decoration
+-        button_disabled_background_color
+-        gtm_enable
+-        gtm_id_local
+-        gtm_id_dev
+-        gtm_id_stage
+-        gtm_id_prod
+-    }
+-    secure_base_media_url
+-    secure_base_static_url
+-    customer_password_minimum_password_length
+-    customer_password_required_character_classes_number
+-    base_media_url
+-    base_static_url
+-    base_url
+-    base_currency_code
+-    code
+-    catalog_search_engine
+-    copyright
+-    catalog_default_sort_by
+-    category_url_suffix
+-    default_title
+-    enable_oms_multiseller
+-    default_keywords
+-    default_description
+-    default_display_currency_code
+-    date_of_birth
+-    gender
+-    general_country_default
+-    header_logo_src
+-    head_shortcut_icon
+-    icube_pinlocation_gmap_key
+-    icube_pinlocation_geocoding_key
+-    locale
+-    logo_alt
+-    logo_width
+-    logo_height
+-    shipments_configuration
+-    payments_configuration
+-    store_name
+-    welcome
+-    timezone
+-    title_prefix
+-    title_suffix
+-    title_separator
+-    website_id
+-    weight_unit
+-    oauth_access_token_lifetime_customer
+-    pwa_checkout_debug_enable
+-    snap_client_key
+-    stripe_config {
+-        stripe_enable
+-        stripe_mode
+-        test_pk
+-        live_pk
+-    }
+-    paypal_key {
+-        cancel_url
+-        client_id
+-        client_secret
+-        disable_funding
+-        intent
+-        key_data
+-        key_token
+-        path
+-        return_url
+-    }
+-    allow_guest_checkout
+-    snap_is_production
+-    aw_blog_general_enabled
+-    pickup_store
+-    cookie_restriction
+-    login_phone_password
+-    forgot_password_phone
+-    global_promo {
+-        enable
+-        text_color
+-        background_color
+-    }
+-    weltpixel_newsletter_general_enable
+-    weltpixel_newsletter_general_version
+-    weltpixel_newsletter_general_overlay_color
+-    weltpixel_newsletter_general_overlay_opacity
+-    weltpixel_newsletter_general_display_mode
+-    weltpixel_newsletter_general_display_mobile
+-    weltpixel_newsletter_general_mobile_version
+-    weltpixel_newsletter_general_popup_cookie_lifetime
+-    weltpixel_newsletter_general_terms_conditions_consent
+-    weltpixel_newsletter_general_terms_conditions_text
+-    weltpixel_newsletter_general_enable_trigger_button
+-    weltpixel_newsletter_general_trigger_button_title
+-    weltpixel_newsletter_general_trigger_button_color
+-    weltpixel_newsletter_general_trigger_button_backgroundcolor
+-    aw_blog_general_comments_enabled
+-    aw_blog_general_disqus_forum_code
+-    aw_blog_related_products_block_layout
+-    aw_blog_related_products_block_position
+-    aw_blog_related_products_products_limit
+-    aw_blog_related_products_display_add_to_cart
+-    weltpixel_RecentlyViewedBar_general_enable
+-    weltpixel_thankyoupage_create_account_enable
+-    payment_travelokapay_public_key
+-    payment_travelokapay_user_id
+-    payment_travelokapay_bin_whitelist
+-    pin_location_latitude
+-    pin_location_longitude
+-    minimum_order_amount
+-    minimum_order_enable
+-    OmsRma {
+-        enable_oms_rma
+-        enable_oms_pwa_request_return
+-        oms_rma_link
+-    }
+-    oms_channel_code
+-    }
+-}`;
+-
+-const generateConfig = async (req, res) => {
+-    if (`Bearer ${getEncryptEnv()}` == req.headers.authorization) {
+-        await generateSetting();
+-        graphQLClient.request(reqBody, {}).then((data) => {
+-            fs.writeFile(`${baseDir}config.json`, JSON.stringify(data), (err) => {
+-                if (err) throw err;
+-            });
+-            res.send(data);
+-        }).catch((err) => {
+-            res.status(500).json(err);
+-            // eslint-disable-next-line no-console
+-            console.log('generate config failed', err);
+-        });
+-    } else {
+-        res.status(403).json({ message: 'Token Invalid' });
+-    }
+-};
+-
+-module.exports = generateConfig;
+diff --git a/core/api/rest/config/index.js b/core/api/rest/config/index.js
+deleted file mode 100644
+index 2e762e0b7..000000000
+--- a/core/api/rest/config/index.js
++++ /dev/null
+@@ -1,64 +0,0 @@
+-/* eslint-disable eqeqeq */
+-/* eslint-disable no-restricted-syntax */
+-const fs = require('fs');
+-const path = require('path');
+-const { dirname } = require('path');
+-const { getAccessEnv, getEncryptEnv } = require('../../../helpers/env');
+-const generateConfig = require('./generateconfig');
+-
+-// urlpath for json file
+-const myRoot = dirname(require.main.filename);
+-const baseDir = path.join(myRoot, 'generated/');
+-const urlList = [`${baseDir}config.json`, `${baseDir}availableStores.json`, `${baseDir}currency.json`];
+-
+-// check file existence
+-let check;
+-async function checkExist() {
+-    check = urlList.map((list) => (
+-        fs.existsSync(list)
+-    ));
+-    return check;
+-}
+-
+-// function to read file json
+-function readTheFile(req, res) {
+-    fs.readFile(`${baseDir}config.json`, 'utf8', (err, jsonString) => {
+-        if (err) {
+-            // eslint-disable-next-line no-console
+-            console.log('File read failed:', err);
+-            res.status(500).json(err);
+-            return;
+-        }
+-        let response = JSON.parse(jsonString);
+-        if (req.query.field) {
+-            const field = req.query.field.split(',');
+-            const tempResponse = {};
+-            field.forEach((element) => {
+-                if (response.storeConfig && response.storeConfig[element]) {
+-                    tempResponse[element] = response.storeConfig[element];
+-                }
+-            });
+-            response = tempResponse;
+-        }
+-        res.status(200).json(response);
+-    });
+-}
+-
+-module.exports = async (req, res) => {
+-    if (`Bearer ${getAccessEnv()}` == req.headers.authorization) {
+-        await checkExist();
+-        if (check.includes(false)) {
+-            const reqHeader = {
+-                headers: {
+-                    authorization: `Bearer ${getEncryptEnv()}`,
+-                },
+-            };
+-            // function to call generate-config
+-            await generateConfig(reqHeader, res);
+-        } else {
+-            readTheFile(req, res);
+-        }
+-    } else {
+-        res.status(403).json({ message: 'Token Invalid' });
+-    }
+-};
+diff --git a/core/api/rest/setting/generatesetting.js b/core/api/rest/setting/generatesetting.js
+deleted file mode 100644
+index 69e67846c..000000000
+--- a/core/api/rest/setting/generatesetting.js
++++ /dev/null
+@@ -1,86 +0,0 @@
+-#! /usr/bin/env node
+-/* eslint-disable eqeqeq */
+-/* eslint-disable no-restricted-syntax */
+-/* eslint-disable no-shadow */
+-const fs = require('fs');
+-const path = require('path');
+-const { dirname } = require('path');
+-const { GraphQLClient, gql } = require('graphql-request');
+-const { graphqlEndpoint } = require('../../../../swift.config');
+-const { getAppEnv, getAccessEnv } = require('../../../helpers/env');
+-
+-// urlpath for json file
+-const myRoot = dirname(require.main.filename);
+-const baseDir = path.join(myRoot, 'generated/');
+-
+-const appEnv = getAppEnv();
+-
+-const graphQLClient = new GraphQLClient(`${graphqlEndpoint[appEnv] || graphqlEndpoint.prod}`, {
+-    method: 'GET',
+-    headers: {
+-        Authorization: `Bearer ${getAccessEnv()}`,
+-        'Content-Type': 'application/json',
+-    },
+-    jsonSerializer: {
+-        parse: JSON.parse,
+-        stringify: JSON.stringify,
+-    },
+-});
+-
+-const getCurrencySchema = gql`
+-    {
+-        currency {
+-            base_currency_code
+-            base_currency_symbol
+-            default_display_currency_code
+-            default_display_currency_symbol
+-            available_currency_codes
+-            exchange_rates {
+-                currency_to
+-                rate
+-            }
+-        }
+-    }
+-`;
+-
+-const getStoreSchema = gql`
+-    {
+-        availableStores{
+-            store_code
+-            store_name
+-            locale
+-            is_default_store
+-        }
+-    }
+-`;
+-
+-async function getCurrency() {
+-    graphQLClient.request(getCurrencySchema, {}).then((data) => {
+-        fs.writeFile(`${baseDir}currency.json`, JSON.stringify(data), (err) => {
+-            if (err) throw err;
+-        });
+-    }).catch((err) => {
+-        // eslint-disable-next-line no-console
+-        console.log('generate currency failed', err);
+-    });
+-}
+-
+-async function getStoreName() {
+-    graphQLClient.request(getStoreSchema, {}).then((data) => {
+-        fs.writeFile(`${baseDir}availableStores.json`, JSON.stringify(data), (err) => {
+-            if (err) throw err;
+-        });
+-    }).catch((err) => {
+-        // eslint-disable-next-line no-console
+-        console.log('generate storename failed', err);
+-    });
+-}
+-
+-const generateSetting = async () => {
+-    await getCurrency();
+-    await getStoreName();
+-};
+-
+-module.exports = {
+-    generateSetting,
+-};
+diff --git a/core/api/rest/setting/index.js b/core/api/rest/setting/index.js
+deleted file mode 100644
+index 0e1f5a538..000000000
+--- a/core/api/rest/setting/index.js
++++ /dev/null
+@@ -1,27 +0,0 @@
+-/* eslint-disable eqeqeq */
+-/* eslint-disable no-restricted-syntax */
+-const fs = require('fs');
+-const path = require('path');
+-const { dirname } = require('path');
+-const { getAccessEnv } = require('../../../helpers/env');
+-
+-// urlpath for json file
+-const myRoot = dirname(require.main.filename);
+-const baseDir = path.join(myRoot, 'generated/');
+-
+-module.exports = (req, res) => {
+-    if (`Bearer ${getAccessEnv()}` == req.headers.authorization) {
+-        fs.readFile(`${baseDir}${req.query.field}.json`, 'utf8', (err, jsonString) => {
+-            if (err) {
+-            // eslint-disable-next-line no-console
+-                console.log('File read failed:', err);
+-                res.status(500).json(err);
+-                return;
+-            }
+-            const response = JSON.parse(jsonString);
+-            res.status(200).json(response);
+-        });
+-    } else {
+-        res.status(403).json({ message: 'Token Invalid' });
+-    }
+-};
+diff --git a/core/modules/setting/components/currency/index.js b/core/modules/setting/components/currency/index.js
+index ca6b1e75d..8d3bf8ef9 100644
+--- a/core/modules/setting/components/currency/index.js
++++ b/core/modules/setting/components/currency/index.js
+@@ -44,12 +44,12 @@ const SwitcherCurrency = (props) => {
+             const getCurrencyFromStorage = () => {
+                 try {
+                     /** [GET] Currency */
+-                    if (data && data.internalGetCurrency) {
++                    if (data && data.currency) {
+                         /** [SET] Currency if not store in local storage */
+-                        const { internalGetCurrency } = data;
+-                        const { base_currency_code } = internalGetCurrency;
+-                        const { default_display_currency_code } = internalGetCurrency;
+-                        const { exchange_rates } = internalGetCurrency;
++                        const { currency } = data;
++                        const { base_currency_code } = currency;
++                        const { default_display_currency_code } = currency;
++                        const { exchange_rates } = currency;
+                         const exchange_rates_base = exchange_rates.filter((item) => item.currency_to === base_currency_code);
+                         const exchange_rates_default = exchange_rates.filter((item) => item.currency_to === default_display_currency_code);
+                         const base_currency_rate = exchange_rates_base[0].rate;
+diff --git a/core/modules/setting/components/language/index.js b/core/modules/setting/components/language/index.js
+index b59c190fc..bb34363fc 100644
+--- a/core/modules/setting/components/language/index.js
++++ b/core/modules/setting/components/language/index.js
+@@ -26,7 +26,7 @@ const SwitcherLanguage = (props) => {
+     useEffect(() => {
+         mount.current = true;
+         if (mount.current && remoteLang !== undefined) {
+-            if (remoteLang && remoteLang.internalGetAvailableStores) {
++            if (remoteLang && remoteLang.availableStores) {
+                 const getLangFromStorage = () => {
+                     // prettier-ignore
+                     const defaultLangFromDatabase = translation.defaultLanguage;
+@@ -34,7 +34,7 @@ const SwitcherLanguage = (props) => {
+                     const storeCode = cookies.get(COOKIES_STORE_CODE);
+                     let defaultDataLang = {};
+                     let loginAsCustomer = {};
+-                    remoteLang.internalGetAvailableStores.forEach(({
++                    remoteLang.availableStores.forEach(({
+                         is_default_store, locale, store_code, store_name,
+                     }) => {
+                         if (is_default_store) {
+@@ -131,7 +131,7 @@ const SwitcherLanguage = (props) => {
+     };
+ 
+     if (remoteLang) {
+-        remoteLang.internalGetAvailableStores.map((item) => {
++        remoteLang.availableStores.map((item) => {
+             dataLang.push({
+                 label: item.store_name,
+                 value: item.locale.slice(0, 2),
+diff --git a/core/modules/setting/services/graphql/schema.js b/core/modules/setting/services/graphql/schema.js
+index 8deebbea1..0aad45a21 100644
+--- a/core/modules/setting/services/graphql/schema.js
++++ b/core/modules/setting/services/graphql/schema.js
+@@ -8,7 +8,7 @@ import { gql } from '@apollo/client';
+  */
+ export const getCurrencySchema = gql`
+     {
+-        internalGetCurrency {
++        currency {
+             base_currency_code
+             base_currency_symbol
+             default_display_currency_code
+@@ -24,7 +24,7 @@ export const getCurrencySchema = gql`
+ 
+ export const getStoreName = gql`
+     {
+-        internalGetAvailableStores{
++        availableStores {
+             store_code
+             store_name
+             locale
+diff --git a/core/modules/slug/index.js b/core/modules/slug/index.js
+index 7852fccf5..3c68fc431 100644
+--- a/core/modules/slug/index.js
++++ b/core/modules/slug/index.js
+@@ -1,6 +1,7 @@
+ import { withApollo } from '@lib_apollo';
+ import { withTranslation } from '@i18n';
+-import requestInternal from '@rest_request';
++import { getCmsList } from '@services/graphql/schema/config';
++import graphRequest from '@graphql_request';
+ import { storeConfigNameCookie } from '@config';
+ import Core from '@core_modules/slug/core';
+ 
+@@ -17,7 +18,7 @@ const Page = (props) => (
+ Page.getInitialProps = async ({ query, req }) => {
+     let cmsList = {};
+     if (typeof window === 'undefined' && !req.cookies[storeConfigNameCookie]) {
+-        cmsList = await requestInternal('getConfig?field=cms_page');
++        cmsList = await graphRequest(getCmsList);
+     }
+     const allcookie = req ? req.cookies : {};
+     const obj = {
+diff --git a/core/modules/theme/pages/_app.js b/core/modules/theme/pages/_app.js
+index c59fdcb12..c3ac3e08a 100644
+--- a/core/modules/theme/pages/_app.js
++++ b/core/modules/theme/pages/_app.js
+@@ -26,7 +26,6 @@ import React from 'react';
+ import { gql } from '@apollo/client';
+ import PageProgressLoader from '@common_loaders/PageProgress';
+ import graphRequest from '@graphql_request';
+-import requestInternal from '@rest_request';
+ import Notification from '@lib_firebase/notification';
+ import firebase from '@lib_firebase/index';
+ import routeMiddleware from '@middleware_route';
+@@ -130,7 +129,7 @@ class MyApp extends App {
+ 
+         if (typeof window === 'undefined' && (!storeConfig || typeof storeConfig.secure_base_media_url === 'undefined')) {
+             // storeConfig = await apolloClient.query({ query: ConfigSchema }).then(({ data }) => data.storeConfig);
+-            storeConfig = await requestInternal('getConfig');
++            storeConfig = await graphRequest(ConfigSchema);
+             frontendOptions = storeConfig;
+             // Handle redirecting to tomaintenance page automatically when GQL is in maintenance mode.
+             // We do this here since query storeConfig is the first query and be done in server side
+diff --git a/core/services/graphql/schema/config.js b/core/services/graphql/schema/config.js
+index 8d85078a8..ebddf662b 100644
+--- a/core/services/graphql/schema/config.js
++++ b/core/services/graphql/schema/config.js
+@@ -133,213 +133,230 @@ export const getVesMenu = `
+ export const storeConfig = `
+ {
+     storeConfig {
+-      allow_guest_checkout
+-      aw_blog_general_comments_enabled
+-      aw_blog_general_disqus_forum_code
+-      aw_blog_general_enabled
+-      aw_blog_related_products_block_layout
+-      aw_blog_related_products_block_position
+-      aw_blog_related_products_display_add_to_cart
+-      aw_blog_related_products_products_limit
+-      base_currency_code
+-      base_media_url
+-      base_static_url
+-      base_url
+-      catalog_default_sort_by
+-      catalog_search_engine
+-      category_url_suffix
+-      code
+-      cookie_restriction
+-      copyright
+-      customer_password_minimum_password_length
+-      customer_password_required_character_classes_number
+-      date_of_birth
+-      default_description
+-      default_display_currency_code
+-      default_keywords
+-      default_title
+-      enable_oms_multiseller
+-      forgot_password_phone
+-      gender
+-      general_country_default
+-      global_promo {
+-          enable
+-          text_color
+-          background_color
+-      }
+-      header_logo_src
+-      head_shortcut_icon
+-      icube_pinlocation_geocoding_key
+-      icube_pinlocation_gmap_key
+-      locale
+-      login_phone_password
+-      logo_alt
+-      logo_height
+-      logo_width
+-      minimum_order_amount
+-      minimum_order_enable
+-      oauth_access_token_lifetime_customer
+-      payments_configuration
+-      payment_travelokapay_bin_whitelist
+-      payment_travelokapay_public_key
+-      payment_travelokapay_user_id
+-      pickup_store
+-      pin_location_latitude
+-      pin_location_longitude
+-      pwa {
+-          add_to_cart_enable
+-          app_name
+-          background_color
+-          button_background_color
+-          button_background_hover_color
+-          button_border_color
+-          button_border_hover_color
+-          button_disabled_background_color
+-          button_disabled_text_color
+-          button_disabled_text_color
+-          button_text_color
+-          button_text_hover_color
+-          cms_contact_identifiers
+-          cms_social_media_link_identifer
+-          configurable_options_enable
+-          custom_install_app_enable
+-          default_font
+-          default_robot
+-          drawer_filter_on_desktop_enable
+-          enabler_footer_mobile
+-          enabler_sticky_header
+-          error_color
+-          facebook_app_id
+-          facebook_meta_id_app_id
+-          facebook_meta_id_enable
+-          font_color
+-          footer_version
+-          header_version
+-          heading_font
+-          home_slider_desktop_height
+-          home_slider_desktop_width
+-          home_slider_mobile_height
+-          home_slider_mobile_width
+-          icon_apple_touch
+-          image_category_height
+-          image_category_width
+-          image_product_height
+-          image_product_width
+-          install_message
+-          label_enable
+-          label_new_enable
+-          label_sale_enable
+-          label_weltpixel_enable
+-          link_color
+-          link_font_decoration
+-          link_font_hover_decoration
+-          link_hover_color
+-          magezon_slider_desktop_height
+-          magezon_slider_desktop_width
+-          magezon_slider_mobile_height
+-          magezon_slider_mobile_width
+-          mobile_navigation
+-          page_size
+-          paypal_debug
+-          paypal_enable
+-          paypal_merchant_id
+-          popup_detail_image_enable
+-          primary_color
+-          promo_banner_lite_after_width
+-          promo_banner_lite_label_width
+-          promo_banner_lite_top_width
+-          quick_view_enable
+-          rating_enable
+-          recaptcha_contact_enable
+-          recaptcha_enable
+-          recaptcha_login_enable
+-          recaptcha_register_enable
+-          recaptcha_server_key_dev
+-          recaptcha_server_key_local
+-          recaptcha_server_key_prod
+-          recaptcha_server_key_stage
+-          recaptcha_site_key_dev
+-          recaptcha_site_key_local
+-          recaptcha_site_key_prod
+-          recaptcha_site_key_stage
+-          remove_decimal_price_enable
+-          secondary_color
+-          share_icon_email
+-          share_icon_facebook
+-          share_icon_line
+-          share_icon_linkedin
+-          share_icon_pinterest
+-          share_icon_telegram
+-          share_icon_twitter
+-          success_msg_color
+-          ves_menu_alias
+-          ves_menu_enable
+-          ves_menu_enable
+-          warning_msg_color
+-          gtm_enable
+-          gtm_id_local
+-          gtm_id_dev
+-          gtm_id_stage
+-          gtm_id_prod
+-      }
+-      pwa_checkout_debug_enable
+-      secure_base_media_url
+-      secure_base_static_url
+-      shipments_configuration
+-      snap_client_key
+-      snap_is_production
+-      store_name
+-      timezone
+-      title_prefix
+-      title_separator
+-      title_suffix
+-      website_id
+-      weight_unit
+-      welcome
+-      weltpixel_newsletter_general_display_mobile
+-      weltpixel_newsletter_general_display_mode
+-      weltpixel_newsletter_general_enable
+-      weltpixel_newsletter_general_enable_trigger_button
+-      weltpixel_newsletter_general_mobile_version
+-      weltpixel_newsletter_general_overlay_color
+-      weltpixel_newsletter_general_overlay_opacity
+-      weltpixel_newsletter_general_popup_cookie_lifetime
+-      weltpixel_newsletter_general_terms_conditions_consent
+-      weltpixel_newsletter_general_terms_conditions_text
+-      weltpixel_newsletter_general_trigger_button_backgroundcolor
+-      weltpixel_newsletter_general_trigger_button_color
+-      weltpixel_newsletter_general_trigger_button_title
+-      weltpixel_newsletter_general_version
+-      weltpixel_RecentlyViewedBar_general_enable
+-      weltpixel_thankyoupage_create_account_enable
+-      OmsRma{
+-        enable_oms_rma
+-        enable_oms_pwa_request_return
+-        oms_rma_link
+-      }
+-      oms_channel_code
+-      snap_is_production
+-      payment_travelokapay_user_id
+-      payment_travelokapay_public_key
+-      payment_travelokapay_bin_whitelist
+-      snap_client_key
+-      stripe_config {
+-        stripe_enable
+-        stripe_mode
+-        test_pk
+-        live_pk
+-      }
+-      paypal_key {
+-        cancel_url
+-        client_id
+-        client_secret
+-        disable_funding
+-        intent
+-        key_data
+-        key_token
+-        path
+-        return_url
+-      }
++        pwa {
++            product_listing_navigation
++            use_cms_page_enable
++            use_cms_page_identifier
++            banner_slider_enable
++            banner_slider_title
++            category_list_enable
++            category_list_url_key            
++            category_list_image_size_desktop_height
++            category_list_image_size_desktop_width
++            category_list_image_size_mobile_height
++            category_list_image_size_mobile_width
++            features_product_enable
++            features_product_url_key
++            use_cms_page_enable
++            use_cms_page_identifier
++            banner_slider_enable
++            banner_slider_title
++            category_list_enable
++            category_list_url_key            
++            category_list_image_size_desktop_height
++            category_list_image_size_desktop_width
++            category_list_image_size_mobile_height
++            category_list_image_size_mobile_width
++            features_product_enable
++            features_product_url_key
++            add_to_cart_enable
++            app_name
++            cms_contact_identifiers
++            cms_social_media_link_identifer
++            configurable_options_enable
++            custom_install_app_enable
++            default_robot
++            drawer_filter_on_desktop_enable
++            enabler_footer_mobile
++            enabler_sticky_header
++            facebook_app_id
++            facebook_meta_id_app_id
++            facebook_meta_id_enable
++            footer_version
++            header_version
++            home_slider_desktop_height
++            home_slider_desktop_width
++            home_slider_mobile_height
++            home_slider_mobile_width
++            icon_apple_touch
++            image_category_height
++            image_category_width
++            image_product_height
++            image_product_width
++            thumbor_enable
++            thumbor_https_http
++            thumbor_url
++            install_message
++            label_enable
++            label_new_enable
++            label_sale_enable
++            label_weltpixel_enable
++            magezon_slider_desktop_height
++            magezon_slider_desktop_width
++            magezon_slider_mobile_height
++            magezon_slider_mobile_width
++            mobile_navigation
++            page_size
++            paypal_debug
++            paypal_enable
++            paypal_merchant_id
++            popup_detail_image_enable
++            promo_banner_lite_after_width
++            promo_banner_lite_label_width
++            promo_banner_lite_top_width
++            quick_view_enable
++            rating_enable
++            recaptcha_contact_enable
++            recaptcha_enable
++            recaptcha_login_enable
++            recaptcha_register_enable
++            recaptcha_server_key_dev
++            recaptcha_server_key_local
++            recaptcha_server_key_prod
++            recaptcha_server_key_stage
++            recaptcha_site_key_dev
++            recaptcha_site_key_local
++            recaptcha_site_key_prod
++            recaptcha_site_key_stage
++            remove_decimal_price_enable
++            share_icon_email
++            share_icon_facebook
++            share_icon_line
++            share_icon_linkedin
++            share_icon_pinterest
++            share_icon_telegram
++            share_icon_twitter
++            ves_menu_alias
++            ves_menu_enable
++            ves_menu_enable
++            primary_color
++            secondary_color
++            background_color
++            error_color
++            warning_msg_color
++            success_msg_color
++            font_color
++            default_font
++            heading_font
++            button_background_color
++            button_background_hover_color
++            button_disabled_background_color
++            button_text_color
++            button_text_hover_color
++            button_disabled_text_color
++            button_border_color
++            button_border_hover_color
++            link_color
++            link_hover_color
++            link_font_decoration
++            link_font_hover_decoration
++        }
++        secure_base_media_url
++        secure_base_static_url
++        customer_password_minimum_password_length
++        customer_password_required_character_classes_number
++        base_media_url
++        base_static_url
++        base_url
++        base_currency_code
++        code
++        catalog_search_engine
++        copyright
++        catalog_default_sort_by
++        category_url_suffix
++        default_title
++        enable_oms_multiseller
++        default_keywords
++        default_description
++        default_display_currency_code
++        date_of_birth
++        gender
++        general_country_default
++        header_logo_src
++        head_shortcut_icon
++        icube_pinlocation_gmap_key
++        icube_pinlocation_geocoding_key
++        locale
++        logo_alt
++        logo_width
++        logo_height
++        shipments_configuration
++        payments_configuration
++        store_name
++        welcome
++        timezone
++        title_prefix
++        title_suffix
++        title_separator
++        website_id
++        weight_unit
++        oauth_access_token_lifetime_customer
++        pwa_checkout_debug_enable
++        snap_client_key
++        stripe_config {
++            stripe_enable
++            stripe_mode
++            test_pk
++            live_pk
++        }
++        paypal_key {
++            cancel_url
++            client_id
++            client_secret
++            disable_funding
++            intent
++            key_data
++            key_token
++            path
++            return_url
++        }
++        allow_guest_checkout
++        snap_is_production
++        aw_blog_general_enabled
++        pickup_store
++        cookie_restriction
++        login_phone_password
++        forgot_password_phone
++        global_promo {
++            enable
++            text_color
++            background_color
++        }
++        weltpixel_newsletter_general_enable
++        weltpixel_newsletter_general_version
++        weltpixel_newsletter_general_overlay_color
++        weltpixel_newsletter_general_overlay_opacity
++        weltpixel_newsletter_general_display_mode
++        weltpixel_newsletter_general_display_mobile
++        weltpixel_newsletter_general_mobile_version
++        weltpixel_newsletter_general_popup_cookie_lifetime
++        weltpixel_newsletter_general_terms_conditions_consent
++        weltpixel_newsletter_general_terms_conditions_text
++        weltpixel_newsletter_general_enable_trigger_button
++        weltpixel_newsletter_general_trigger_button_title
++        weltpixel_newsletter_general_trigger_button_color
++        weltpixel_newsletter_general_trigger_button_backgroundcolor
++        aw_blog_general_comments_enabled
++        aw_blog_general_disqus_forum_code
++        aw_blog_related_products_block_layout
++        aw_blog_related_products_block_position
++        aw_blog_related_products_products_limit
++        aw_blog_related_products_display_add_to_cart
++        weltpixel_RecentlyViewedBar_general_enable
++        weltpixel_thankyoupage_create_account_enable
++        payment_travelokapay_public_key
++        payment_travelokapay_user_id
++        payment_travelokapay_bin_whitelist
++        pin_location_latitude
++        pin_location_longitude
++        minimum_order_amount
++        minimum_order_enable
++        OmsRma {
++            enable_oms_rma
++            enable_oms_pwa_request_return
++            oms_rma_link
++        }
++        oms_channel_code
+     }
+ }  
+ `;
+diff --git a/generated/readme.md b/generated/readme.md
+deleted file mode 100644
+index 44afd81af..000000000
+--- a/generated/readme.md
++++ /dev/null
+@@ -1,2 +0,0 @@
+-# Description
+-This is a folder for generated config json file
+\ No newline at end of file
+diff --git a/server.js b/server.js
+index 18c269c9c..d49dedfa3 100644
+--- a/server.js
++++ b/server.js
+@@ -23,9 +23,6 @@ const {
+     expiredToken, nossrCache, features, assetsVersion,
+ } = require('./swift.config');
+ const generateXml = require('./core/api/rest/xml');
+-const generateConfig = require('./core/api/rest/config/generateconfig');
+-const getSetting = require('./core/api/rest/setting');
+-const getConfig = require('./core/api/rest/config');
+ const captchaValidation = require('./core/api/rest/captcha');
+ const firebaseValidation = require('./core/api/rest/firebase-cloud-messaging');
+ const geocodingServices = require('./core/api/rest/geocoding');
+@@ -175,9 +172,6 @@ async function renderAndCache(req, res) {
+         res.sendFile(path.join(__dirname, '/public/static/maintenance.html'));
+     });
+ 
+-    // generate config from magento
+-    server.get('/generate-config', generateConfig);
+-
+     server.get('/sitemap.xml', generateXml);
+     server.post('/captcha-validation', captchaValidation);
+ 
+@@ -190,9 +184,6 @@ async function renderAndCache(req, res) {
+     // geocoding services
+     server.post('/geocoding-services', geocodingServices);
+ 
+-    server.get('/getConfig', getConfig);
+-    server.get('/getSetting', getSetting);
+-
+     /**
+      * configuration firebase messaging
+      *   */
+-- 
+2.33.1.windows.1
+

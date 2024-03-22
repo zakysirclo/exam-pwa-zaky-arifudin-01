@@ -1,0 +1,12 @@
+{
+    "success": {
+        "title": "Checkout Berhasil",
+        "message": "Checkout Kamu berhasil",
+        "waitingRedirect": "Tunggu {{s}} detik untuk otomatis diarahkan ke Halaman Utama"
+    },
+    "error": {
+        "title": "Checkout Gagal",
+        "message": "Checkout Kamu gagal",
+        "waitingRedirect": "Tunggu {{s}} detik untuk otomatis diarahkan ke Halaman Cart"
+    }
+}

@@ -1,0 +1,12 @@
+{
+  "created": "Created ",
+  "productName": "Product Name ",
+  "rating": "Rating ",
+  "review": "Review",
+  "title": "My Product Review",
+  "addYourReview": "Add Your Review",
+  "yourReview": "Your Review",
+  "emptyMessage" : "You have not reviewed the product.",
+  "submittedOn": "Submitted on",
+  "seeDetails": "See Details"
+}

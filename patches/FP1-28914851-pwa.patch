@@ -1,0 +1,2873 @@
+From 2846f367f1b88ee7e772595a861770d33e673132 Mon Sep 17 00:00:00 2001
+From: Asih Priyatno <asih.priyatno@sirclo.com>
+Date: Mon, 21 Nov 2022 07:03:34 +0700
+Subject: [PATCH 01/18] fix([28914851] improvement): create improvement
+ peformance issue
+
+---
+ cli/config/bin/index.js                       | 263 ++++++++++++++++++
+ cli/config/package.json                       |  21 ++
+ core/api/graphql/request/index.js             |  34 ++-
+ core/api/rest/config/config.json              | 196 +++++++++++++
+ core/api/rest/config/config2.json             |   1 +
+ core/api/rest/config/index.js                 |  12 +
+ core/api/rest/request/index.js                |   9 +
+ .../home/pages/default/components/index.js    |   1 -
+ core/modules/home/pages/default/core.js       |   8 +-
+ core/modules/home/pages/default/index.js      |  14 +-
+ core/modules/theme/pages/_app.js              |  11 +-
+ ecosystem.config.js                           |  11 +
+ jsconfig.json                                 |   1 +
+ load.sh                                       |  22 ++
+ package.json                                  |   2 +-
+ pages/test.js                                 |   3 +
+ server.js                                     |   3 +
+ swift.config.js                               |   4 +-
+ yarn.lock                                     |  63 +++--
+ 19 files changed, 629 insertions(+), 50 deletions(-)
+ create mode 100644 cli/config/bin/index.js
+ create mode 100644 cli/config/package.json
+ create mode 100644 core/api/rest/config/config.json
+ create mode 100644 core/api/rest/config/config2.json
+ create mode 100644 core/api/rest/config/index.js
+ create mode 100644 core/api/rest/request/index.js
+ create mode 100644 ecosystem.config.js
+ create mode 100755 load.sh
+ create mode 100644 pages/test.js
+
+diff --git a/cli/config/bin/index.js b/cli/config/bin/index.js
+new file mode 100644
+index 000000000..5cef75644
+--- /dev/null
++++ b/cli/config/bin/index.js
+@@ -0,0 +1,263 @@
++#! /usr/bin/env node
++const fs = require('fs');
++const path = require('path');
++const { GraphQLClient, gql } = require('graphql-request');
++
++const baseDir = path.join(__dirname, '../../../core/api/rest/config/');
++
++const graphQLClient = new GraphQLClient('https://b2cdemo.getswift.asia/graphql', {
++    method: 'GET',
++    jsonSerializer: {
++        parse: JSON.parse,
++        stringify: JSON.stringify,
++    },
++});
++
++const req = gql`{
++    storeConfig {
++      secure_base_media_url
++      secure_base_static_url
++      customer_password_minimum_password_length
++      customer_password_required_character_classes_number
++      base_media_url
++      base_static_url
++      base_url
++      base_currency_code
++      code
++      catalog_search_engine
++      copyright
++      catalog_default_sort_by
++      category_url_suffix
++      default_title
++      default_keywords
++      default_description
++      default_display_currency_code
++      date_of_birth
++      gender
++      general_country_default
++      header_logo_src
++      head_shortcut_icon
++      icube_pinlocation_gmap_key
++      icube_pinlocation_geocoding_key
++      locale
++      logo_alt
++      logo_width
++      logo_height
++      shipments_configuration
++      payments_configuration
++      pwa {
++        use_cms_page_enable
++        use_cms_page_identifier
++        banner_slider_enable
++        banner_slider_title
++        category_list_enable
++        category_list_url_key            
++        category_list_image_size_desktop_height
++        category_list_image_size_desktop_width
++        category_list_image_size_mobile_height
++        category_list_image_size_mobile_width
++        features_product_enable
++        features_product_url_key
++        use_cms_page_enable
++        use_cms_page_identifier
++        banner_slider_enable
++        banner_slider_title
++        category_list_enable
++        category_list_url_key            
++        category_list_image_size_desktop_height
++        category_list_image_size_desktop_width
++        category_list_image_size_mobile_height
++        category_list_image_size_mobile_width
++        features_product_enable
++        features_product_url_key
++        primary_color
++        secondary_color
++        background_color
++        error_color
++        warning_msg_color
++        success_msg_color
++        font_color
++        default_font
++        heading_font
++        button_background_color
++        button_background_hover_color
++        button_disabled_text_color
++        button_disabled_background_color
++        button_text_color
++        button_text_hover_color
++        button_disabled_text_color
++        button_border_color
++        button_border_hover_color
++        link_color
++        link_hover_color
++        link_font_decoration
++        link_font_hover_decoration
++        add_to_cart_enable
++        app_name
++        cms_contact_identifiers
++        cms_social_media_link_identifer
++        configurable_options_enable
++        custom_install_app_enable
++        default_robot
++        drawer_filter_on_desktop_enable
++        enabler_footer_mobile
++        enabler_sticky_header
++        facebook_app_id
++        facebook_meta_id_app_id
++        facebook_meta_id_enable
++        footer_version
++        header_version
++        home_slider_desktop_height
++        home_slider_desktop_width
++        home_slider_mobile_height
++        home_slider_mobile_width
++        icon_apple_touch
++        image_category_height
++        image_category_width
++        image_product_height
++        image_product_width
++        thumbor_enable
++        thumbor_https_http
++        thumbor_url
++        install_message
++        label_enable
++        label_new_enable
++        label_sale_enable
++        label_weltpixel_enable
++        magezon_slider_desktop_height
++        magezon_slider_desktop_width
++        magezon_slider_mobile_height
++        magezon_slider_mobile_width
++        mobile_navigation
++        page_size
++        paypal_debug
++        paypal_enable
++        paypal_merchant_id
++        popup_detail_image_enable
++        promo_banner_lite_after_width
++        promo_banner_lite_label_width
++        promo_banner_lite_top_width
++        quick_view_enable
++        rating_enable
++        recaptcha_contact_enable
++        recaptcha_enable
++        recaptcha_login_enable
++        recaptcha_register_enable
++        recaptcha_server_key_dev
++        recaptcha_server_key_local
++        recaptcha_server_key_prod
++        recaptcha_server_key_stage
++        recaptcha_site_key_dev
++        recaptcha_site_key_local
++        recaptcha_site_key_prod
++        recaptcha_site_key_stage
++        remove_decimal_price_enable
++        share_icon_email
++        share_icon_facebook
++        share_icon_line
++        share_icon_linkedin
++        share_icon_pinterest
++        share_icon_telegram
++        share_icon_twitter
++        ves_menu_alias
++        ves_menu_enable
++        ves_menu_enable
++        primary_color
++        secondary_color
++        background_color
++        error_color
++        warning_msg_color
++        success_msg_color
++        font_color
++        default_font
++        heading_font
++        button_background_color
++        button_background_hover_color
++        button_disabled_text_color
++        button_disabled_background_color
++        button_text_color
++        button_text_hover_color
++        button_disabled_text_color
++        button_border_color
++        button_border_hover_color
++        link_color
++        link_hover_color
++        link_font_decoration
++        link_font_hover_decoration
++      }
++      store_name
++      welcome
++      timezone
++      title_prefix
++      title_suffix
++      title_separator
++      website_id
++      weight_unit
++      oauth_access_token_lifetime_customer
++      pwa_checkout_debug_enable
++      snap_client_key
++      allow_guest_checkout
++      snap_is_production
++      aw_blog_general_enabled
++      pickup_store
++      cookie_restriction
++      login_phone_password
++      forgot_password_phone
++      global_promo {
++        enable
++        text_color
++        background_color
++      }
++      weltpixel_newsletter_general_enable
++      weltpixel_newsletter_general_version
++      weltpixel_newsletter_general_overlay_color
++      weltpixel_newsletter_general_overlay_opacity
++      weltpixel_newsletter_general_display_mode
++      weltpixel_newsletter_general_display_mobile
++      weltpixel_newsletter_general_mobile_version
++      weltpixel_newsletter_general_popup_cookie_lifetime
++      weltpixel_newsletter_general_terms_conditions_consent
++      weltpixel_newsletter_general_terms_conditions_text
++      weltpixel_newsletter_general_enable_trigger_button
++      weltpixel_newsletter_general_trigger_button_title
++      weltpixel_newsletter_general_trigger_button_color
++      weltpixel_newsletter_general_trigger_button_backgroundcolor
++      aw_blog_general_comments_enabled
++      aw_blog_general_disqus_forum_code
++      aw_blog_related_products_block_layout
++      aw_blog_related_products_block_position
++      aw_blog_related_products_products_limit
++      aw_blog_related_products_display_add_to_cart
++      weltpixel_RecentlyViewedBar_general_enable
++      weltpixel_thankyoupage_create_account_enable
++      payment_travelokapay_public_key
++      payment_travelokapay_user_id
++      payment_travelokapay_bin_whitelist
++      pin_location_latitude
++      pin_location_longitude
++      minimum_order_amount
++      minimum_order_enable
++      OmsRma{
++        enable_oms_rma
++        enable_oms_pwa_request_return
++        oms_rma_link
++      }
++      oms_channel_code
++    }
++  }  `;
++graphQLClient.request(req, {}).then((data) => {
++    console.log('Success');
++    console.log(data);
++    fs.writeFile(`${baseDir}config2.json`, JSON.stringify(data), (err) => {
++        if (err) throw err;
++    });
++}).catch((err) => console.log(err));
++
++// fs.readFile(`${baseDir}/config.json`, "utf8", (err, jsonString) => {
++// if (err) {
++//     console.log(baseDir)
++//     console.log("File read failed:", err);
++//     return;
++// }
++// console.log(JSON.parse(jsonString));
++// });
+diff --git a/cli/config/package.json b/cli/config/package.json
+new file mode 100644
+index 000000000..b3dd702e0
+--- /dev/null
++++ b/cli/config/package.json
+@@ -0,0 +1,21 @@
++{
++  "name": "st-cli-example",
++  "version": "0.0.1",
++  "description": "An example showing a simple CLI tool for working with SmartThings-connected devices.",
++  "main": "bin/cli.js",
++  "scripts": {
++    "generate": "node bin/index.js",
++    "test": "echo \"Error: no test specified\" && exit 1"
++  },
++  "author": "SmartThings",
++  "license": "Apache-2.0",
++  "dependencies": {
++    "commander": "^2.11.0",
++    "prettyjson": "^1.2.1",
++    "request": "^2.83.0",
++    "request-promise": "^4.2.2"
++  },
++  "bin": {
++    "sthelper": "./bin/cli.js"
++  }
++}
+\ No newline at end of file
+diff --git a/core/api/graphql/request/index.js b/core/api/graphql/request/index.js
+index a64322bc1..9af33f007 100644
+--- a/core/api/graphql/request/index.js
++++ b/core/api/graphql/request/index.js
+@@ -1,6 +1,6 @@
+ /* eslint-disable no-console */
+ /* eslint-disable no-nested-ternary */
+-const { GraphQLClient } = require('graphql-request');
++const { GraphQLClient, gql } = require('graphql-request');
+ const { graphqlEndpoint, storeCode } = require('../../../../swift.config');
+ 
+ const { decrypt } = require('../../../helpers/encryption');
+@@ -14,14 +14,32 @@ function requestGraph(query, variables = {}, context = {}, config = {}) {
+         token = context.session.token ? `Bearer ${decrypt(context.session.token)}`
+             : context.headers.authorization ? context.headers.authorization : '';
+     }
++    const additionalHeader = storeCode ? { store: storeCode } : {};
++    if (token && token !== '') {
++        additionalHeader.Authorization = token;
++    }
++    const headers = {
++        ...additionalHeader,
++    };
++    if (config.method && config.method === 'GET') {
++        return new Promise((resolve) => {
++            const appEnv = getAppEnv();
++
++            const graphQLClient = new GraphQLClient(`${graphqlEndpoint[appEnv] || graphqlEndpoint.prod}`, {
++                method: 'GET',
++                jsonSerializer: {
++                    parse: JSON.parse,
++                    stringify: JSON.stringify,
++                },
++            });
++
++            const req = gql`${query}`;
++            graphQLClient.request(req, variables).then((data) => {
++                resolve(data);
++            }).catch((err) => resolve(err));
++        });
++    }
+     return new Promise((resolve) => {
+-        const additionalHeader = storeCode ? { store: storeCode } : {};
+-        if (token && token !== '') {
+-            additionalHeader.Authorization = token;
+-        }
+-        const headers = {
+-            ...additionalHeader,
+-        };
+         const appEnv = getAppEnv();
+         const client = new GraphQLClient(`${graphqlEndpoint[appEnv] || graphqlEndpoint.prod}`, {
+             headers,
+diff --git a/core/api/rest/config/config.json b/core/api/rest/config/config.json
+new file mode 100644
+index 000000000..4bc4f91cf
+--- /dev/null
++++ b/core/api/rest/config/config.json
+@@ -0,0 +1,196 @@
++{
++    "storeConfig": {
++      "secure_base_media_url": "https://b2cdemo.getswift.asia/media/",
++      "secure_base_static_url": "https://b2cdemo.getswift.asia/static/version1667899076/",
++      "customer_password_minimum_password_length": 8,
++      "customer_password_required_character_classes_number": 3,
++      "base_media_url": "https://b2cdemo.getswift.asia/media/",
++      "base_static_url": "https://b2cdemo.getswift.asia/static/version1667899076/",
++      "base_url": "https://b2cdemo.getswift.asia/",
++      "base_currency_code": "IDR",
++      "code": "v1",
++      "catalog_search_engine": "elasticsuite",
++      "copyright": "Copyright © 2013-present Magento, Inc. All rights reserved.",
++      "catalog_default_sort_by": "position",
++      "category_url_suffix": ".html",
++      "default_title": "Magento Commerce",
++      "default_keywords": "swift,icube",
++      "default_description": "this is demo swift site",
++      "default_display_currency_code": "IDR",
++      "date_of_birth": null,
++      "gender": null,
++      "general_country_default": "ID",
++      "header_logo_src": "stores/1/icube_swift-07_copy3.png",
++      "head_shortcut_icon": "stores/1/faveicoswift.png",
++      "icube_pinlocation_gmap_key": "AIzaSyCsWgNT9vLJSzSBmJlqFdembBz4zBCLRgQ",
++      "icube_pinlocation_geocoding_key": null,
++      "locale": "en_US",
++      "logo_alt": null,
++      "logo_width": 150,
++      "logo_height": 65,
++      "shipments_configuration": "{\n                    \"sg-recommended by shipper\": \"shipperid_Recommended by Shipper\",\n                    \"sg-freeshipping\": \"freeshipping_freeshipping,freeshipping_null,pickup_pickup\",\n                    \"sg-express\": \"shipperid_Anteraja-Next Day,shipperid_JNE-CTCYES,shipperid_JNE-YES,shipperid_Lion Parcel-ONEPACK,shipperid_Ninja Xpress-Next Day,shipperid_RPX-NDP,shipperid_SAP-One Day Service,shipperid_SiCepat-BEST,shipperid_Tiki-ONS,logistix_JNE-YES,logistix_JNE-CTC,logistix_JNE-CTCYES,logistix_SICEPAT-BEST,logistix_ANTERAJA-NEXTDAY,popaket_JNE-SPS19,popaket_JNE-YES19,popaket_SiCepat-BEST,popaket_SAP Logistic-UDRONS,popaket_SAP Logistic-DRSDS,popaket_Wahana-DETUX,popaket_Tiki-ONSTIKI,popaket_Tiki-TDSTIKI,popaket_RPX-PSM,popaket_RPX-PSN,popaket_REX-REXEXPRESS,popaket_REX-REX-1,popaket_POS Indonesia-240,popaket_POS Indonesia-2Q9,popaket_POS Indonesia-447,popaket_Lion Parcel-DOCUMENT-ONEPACK,popaket_Lion Parcel-PACKAGE-ONEPACK,popaket_AlfaTrex-ODPOP,popaket_AlfaTrex-NDSALF,popaket_POPExpress-EXPPOP,popaket_AnterAja-NDAJA,popaket_Paxel-PAXELND\",\n                    \"sg-sameday\": \"gosend_sameday,grabexpress_same_day,grabexpress_null,gosend_null,shipperid_Anteraja-Same Day,shipperid_GO SEND-Same Day,shipperid_Grab Express-Same Day,logistix_GOSEND-SAMEDAY,logistix_GRAB-SAMEDAY,logistix_PAXEL-SAMEDAY,logistix_ANTERAJA-SAMEDAY,popaket_SiCepat-SDS,popaket_Tiki-SDSTIKI,popaket_RPX-PSS,popaket_AlfaTrex-SDSALF,popaket_Grab-SDSGRAB,popaket_AnterAja-SDAJA,popaket_AnterAja-SDSAJA,popaket_Paxel-PAXELSD,popaket_Go Send-SAMEDAYGOJEK,popaket_Borzo-same_day\",\n                    \"sg-instant\": \"gosend_instant,grabexpress_instant,shipperid_GO SEND-Instant,shipperid_Grab Express-Instant,logistix_GOSEND-INSTANT,logistix_GRAB-INSTANT,popaket_Lalamove-MOTORCYCLELALA,popaket_Lalamove-MPVLALA,popaket_Lalamove-TRUCK175LALA,popaket_Lalamove-VANLALA,popaket_Lalamove-SEDANLALA,popaket_Grab-BULKGRAB,popaket_Grab-INSGRAB,popaket_Go Send-INSTANTGOJEK,popaket_Deliveree-deetrontonbox,popaket_Deliveree-deetrontonwingbox,popaket_Deliveree-deefusoheavy,popaket_Deliveree-deefusolite,popaket_Deliveree-deedoubleengkelpickup,popaket_Deliveree-deeengkelbox,popaket_Deliveree-deeengkelpickup,popaket_Deliveree-deesmallpickup,popaket_Deliveree-deevan,popaket_Deliveree-deeeconomy,popaket_Borzo-standardbike,popaket_Borzo-standardvan,popaket_Borzo-standardcar,popaket_Borzo-standardsuv,popaket_Borzo-standardminivan\",\n                    \"sg-reguler\": \"advancerate_null,advancerate_advancedmatrix,flatrate_flatrate,tablerate_bestway,shipperid_Anteraja-Regular,shipperid_J&T-Express,shipperid_JNE-CTC,shipperid_JNE-OKE,shipperid_JNE-REG,shipperid_Lion Parcel-REGPACK,shipperid_Ninja Xpress-Standard,shipperid_RPX-RGP,shipperid_SAP-Reguler,shipperid_SiCepat-HALU,shipperid_SiCepat-REG,shipperid_Tiki-ECO,shipperid_Tiki-REG,shipperid_Wahana-Regular,logistix_JNE-CTC,logistix_JNE-REG,logistix_SICEPAT-REG,logistix_POS,logistix_JNT-EZ,logistix_ANTERAJA-REG,shipperid_null,popaket_null,popaket_JNE-OKE19,popaket_JNE-REG19,popaket_SiCepat-HALU,popaket_SiCepat-SIUNT,popaket_SiCepat-REG,popaket_SAP Logistic-UDRREG,popaket_Wahana-DTUK,popaket_Wahana-DENO,popaket_Tiki-REGTIKI,popaket_Tiki-ECOTIKI,popaket_RPX-PSR,popaket_Ninja Xpress-STD,popaket_REX-REX-10,popaket_REX-REXREGULAR,popaket_POS Indonesia-PVG,popaket_POS Indonesia-311,popaket_POS Indonesia-PJE,popaket_POS Indonesia-PJB,popaket_POS Indonesia-PDG,popaket_Lion Parcel-PACKAGE-LANDPACK,popaket_Lion Parcel-DOCUMENT-REGPACK,popaket_Lion Parcel-PACKAGE-REGPACK,popaket_AlfaTrex-ECSALF,popaket_AlfaTrex-RGSALF,popaket_PopExpress-REGPOP,popaket_AnterAja-REGAJA,popaket_J&T Express-EZ\",\n                    \"sg-trucking\": \"shipperid_Indah Cargo-Laut,shipperid_Dakota Cargo-Reguler,shipperid_Indah Cargo-Darat,shipperid_JNE-JTR,logistix_JNE-JTR,shipperid_SiCepat-GOKIL,logistix_SICEPAT-GOKIL,popaket_JNE-JTR18,popaket_JNE-JTR250,popaket_JNE-JTR<150,popaket_JNE-JTR>250, popaket_SiCepat-CARGO,popaket_SiCepat-GOKIL,popaket_SAP Logistic-DRGREG,popaket_Tiki-TRCTIKI,popaket_Tiki-T15TIKI,popaket_Tiki-T25TIKI,popaket_Tiki-T60TIKI,popaket_Indah Logistik-LAUT,popaket_Indah Logistik-DARAT,popaket_Indah Logistik-TRUCK,popaket_Indah Logistik-TOWING,popaket_Indah Logistik-CITY,popaket_Indah Logistik-UDARA,popaket_Sentral Cargo-DARAT-ELEKTRONIK,popaket_Sentral Cargo-DARATSENTRAL,popaket_Sentral Cargo-DARAT-NON ELEKTRONIK,popaket_Sentral Cargo-UDARA-ELEKTRONIK,popaket_Sentral Cargo-UDARA-NON ELEKTRONIK,popaket_Sentral Cargo-UDARASENTRAL\",\n                    \"sg-international\": \"shipperid_DPEX-EXPRESS PARCEL,shipperid_JNE-INTL,popaket_Wahana-SG00\"\n                    }\n                ",
++      "payments_configuration": "{\"pg-banktransfer\":\"snap_banktransfer,snap_banktransfer_bca,snap_banktransfer_bni,banktransfer,snap_banktransfer_permata\",\"pg-installment\":\"snap_mandiri_installment,snap_bca_installment,snap_bni_installment,snap_mandiri_installment_3,snap_mandiri_installment_6,snap_mandiri_installment_12,snap_bca_installment,snap_maybank_installment,snap_bni_installment_3,snap_bni_installment_6,snap_bni_installment_12,\",\"pg-creditcard\":\"snap_creditcardbin,snap_creditcard,travelokapay\",\"pg-internetpayment\":\"snap_cimbclicks,snap_bcaklikpay,snap_klikbca,snap_alfamart,snap_indomaret,snap_klikbca,snap_gopay,snap_bcaklikpay,ipay88_ovo\",\"pg-others\":\"checkmo,cashondelivery,snap_mandiri_bill_payment,xendit,cc,alfamart,bcava,bniva,briva,mandiriva,permatava,dana,dd_bri,indomaret,linkaja,ovo,cc_subscription,kredivo,qr_codes\"}",
++      "pwa": {
++        "use_cms_page_enable": true,
++        "use_cms_page_identifier": "pwa-homepage",
++        "banner_slider_enable": false,
++        "banner_slider_title": null,
++        "category_list_enable": false,
++        "category_list_url_key": null,
++        "category_list_image_size_desktop_height": null,
++        "category_list_image_size_desktop_width": null,
++        "category_list_image_size_mobile_height": null,
++        "category_list_image_size_mobile_width": null,
++        "features_product_enable": false,
++        "features_product_url_key": null,
++        "primary_color": null,
++        "secondary_color": null,
++        "background_color": null,
++        "error_color": null,
++        "warning_msg_color": null,
++        "success_msg_color": null,
++        "font_color": null,
++        "default_font": "0",
++        "heading_font": "0",
++        "button_background_color": null,
++        "button_background_hover_color": null,
++        "button_disabled_text_color": null,
++        "button_disabled_background_color": null,
++        "button_text_color": null,
++        "button_text_hover_color": null,
++        "button_border_color": null,
++        "button_border_hover_color": null,
++        "link_color": null,
++        "link_hover_color": null,
++        "link_font_decoration": null,
++        "link_font_hover_decoration": null,
++        "add_to_cart_enable": false,
++        "app_name": "Swift PWA",
++        "cms_contact_identifiers": "contact-us-info",
++        "cms_social_media_link_identifer": "pwa_socmed_links",
++        "configurable_options_enable": false,
++        "custom_install_app_enable": true,
++        "default_robot": "INDEX,FOLLOW",
++        "drawer_filter_on_desktop_enable": false,
++        "enabler_footer_mobile": true,
++        "enabler_sticky_header": true,
++        "facebook_app_id": null,
++        "facebook_meta_id_app_id": null,
++        "facebook_meta_id_enable": false,
++        "footer_version": "pwa_footer_v1",
++        "header_version": "v1",
++        "home_slider_desktop_height": "750",
++        "home_slider_desktop_width": "1800",
++        "home_slider_mobile_height": "750",
++        "home_slider_mobile_width": "960",
++        "icon_apple_touch": null,
++        "image_category_height": "577",
++        "image_category_width": "960",
++        "image_product_height": "300",
++        "image_product_width": "240",
++        "thumbor_enable": true,
++        "thumbor_https_http": false,
++        "thumbor_url": "https://thumbor.sirclocdn.com/unsafe/widthxheight/filters:format(webp)/",
++        "install_message": "Get free app",
++        "label_enable": true,
++        "label_new_enable": false,
++        "label_sale_enable": false,
++        "label_weltpixel_enable": true,
++        "magezon_slider_desktop_height": "750",
++        "magezon_slider_desktop_width": "1800",
++        "magezon_slider_mobile_height": "750",
++        "magezon_slider_mobile_width": "960",
++        "mobile_navigation": "bottom_navigation",
++        "page_size": "10",
++        "paypal_debug": false,
++        "paypal_enable": false,
++        "paypal_merchant_id": "CXCQMWK6ZNELQ",
++        "popup_detail_image_enable": true,
++        "promo_banner_lite_after_width": "350",
++        "promo_banner_lite_label_width": "350",
++        "promo_banner_lite_top_width": "1300",
++        "quick_view_enable": true,
++        "rating_enable": false,
++        "recaptcha_contact_enable": false,
++        "recaptcha_enable": false,
++        "recaptcha_login_enable": false,
++        "recaptcha_register_enable": false,
++        "recaptcha_server_key_dev": null,
++        "recaptcha_server_key_local": null,
++        "recaptcha_server_key_prod": null,
++        "recaptcha_server_key_stage": null,
++        "recaptcha_site_key_dev": null,
++        "recaptcha_site_key_local": null,
++        "recaptcha_site_key_prod": null,
++        "recaptcha_site_key_stage": null,
++        "remove_decimal_price_enable": true,
++        "share_icon_email": false,
++        "share_icon_facebook": true,
++        "share_icon_line": false,
++        "share_icon_linkedin": false,
++        "share_icon_pinterest": true,
++        "share_icon_telegram": false,
++        "share_icon_twitter": true,
++        "ves_menu_alias": "top-menu",
++        "ves_menu_enable": true
++      },
++      "store_name": "v1",
++      "welcome": "Default welcome msg!",
++      "timezone": "Asia/Jakarta",
++      "title_prefix": null,
++      "title_suffix": null,
++      "title_separator": "-",
++      "website_id": 1,
++      "weight_unit": "lbs",
++      "oauth_access_token_lifetime_customer": "1",
++      "pwa_checkout_debug_enable": null,
++      "snap_client_key": "SB-Mid-client-hxJtckX_vnT7odR0",
++      "allow_guest_checkout": true,
++      "snap_is_production": "0",
++      "aw_blog_general_enabled": "1",
++      "pickup_store": true,
++      "cookie_restriction": false,
++      "login_phone_password": null,
++      "forgot_password_phone": null,
++      "global_promo": {
++        "enable": false,
++        "text_color": "#B05D5D",
++        "background_color": "#FFE8E8"
++      },
++      "weltpixel_newsletter_general_enable": "1",
++      "weltpixel_newsletter_general_version": "3",
++      "weltpixel_newsletter_general_overlay_color": "#000000",
++      "weltpixel_newsletter_general_overlay_opacity": "0.8",
++      "weltpixel_newsletter_general_display_mode": "1",
++      "weltpixel_newsletter_general_display_mobile": "1",
++      "weltpixel_newsletter_general_mobile_version": "3",
++      "weltpixel_newsletter_general_popup_cookie_lifetime": "4",
++      "weltpixel_newsletter_general_terms_conditions_consent": "1",
++      "weltpixel_newsletter_general_terms_conditions_text": "<a href=\"https://pearl.weltpixel.com/privacy-policy-cookie-restriction-mode\" target=\"_blank\">I agree to the Privacy Policy. </a>",
++      "weltpixel_newsletter_general_enable_trigger_button": "1",
++      "weltpixel_newsletter_general_trigger_button_title": "WANT A DISCOUNT?",
++      "weltpixel_newsletter_general_trigger_button_color": "#FFFFFF",
++      "weltpixel_newsletter_general_trigger_button_backgroundcolor": "#000000",
++      "aw_blog_general_comments_enabled": null,
++      "aw_blog_general_disqus_forum_code": null,
++      "aw_blog_related_products_block_layout": null,
++      "aw_blog_related_products_block_position": "not_display",
++      "aw_blog_related_products_products_limit": 8,
++      "aw_blog_related_products_display_add_to_cart": null,
++      "weltpixel_RecentlyViewedBar_general_enable": "0",
++      "weltpixel_thankyoupage_create_account_enable": true,
++      "payment_travelokapay_public_key": "xnd_public_development_uxS0yhNGTVT4BDaDWRuy0pjmB5YMWxvHhFf6qLAO6x5jSzVSQQplMi8AyBy",
++      "payment_travelokapay_user_id": "621610c74c98b14ae3006a78",
++      "payment_travelokapay_bin_whitelist": null,
++      "pin_location_latitude": -6.227599,
++      "pin_location_longitude": 106.8242503,
++      "minimum_order_amount": null,
++      "minimum_order_enable": null,
++      "OmsRma": {
++        "enable_oms_rma": null,
++        "enable_oms_pwa_request_return": false,
++        "oms_rma_link": "https://b2cdemo.getswift.asia/aw_rma/customer/"
++      },
++      "oms_channel_code": "SWI"
++    }
++  }
+\ No newline at end of file
+diff --git a/core/api/rest/config/config2.json b/core/api/rest/config/config2.json
+new file mode 100644
+index 000000000..48acf6ca3
+--- /dev/null
++++ b/core/api/rest/config/config2.json
+@@ -0,0 +1 @@
++{"storeConfig":{"secure_base_media_url":"https://b2cdemo.getswift.asia/media/","secure_base_static_url":"https://b2cdemo.getswift.asia/static/version1667899076/","customer_password_minimum_password_length":8,"customer_password_required_character_classes_number":3,"base_media_url":"https://b2cdemo.getswift.asia/media/","base_static_url":"https://b2cdemo.getswift.asia/static/version1667899076/","base_url":"https://b2cdemo.getswift.asia/","base_currency_code":"IDR","code":"v1","catalog_search_engine":"elasticsuite","copyright":"Copyright © 2013-present Magento, Inc. All rights reserved.","catalog_default_sort_by":"position","category_url_suffix":".html","default_title":"Magento Commerce","default_keywords":"swift,icube","default_description":"this is demo swift site","default_display_currency_code":"IDR","date_of_birth":null,"gender":null,"general_country_default":"ID","header_logo_src":"stores/1/icube_swift-07_copy3.png","head_shortcut_icon":"stores/1/faveicoswift.png","icube_pinlocation_gmap_key":"AIzaSyCsWgNT9vLJSzSBmJlqFdembBz4zBCLRgQ","icube_pinlocation_geocoding_key":null,"locale":"en_US","logo_alt":null,"logo_width":150,"logo_height":65,"shipments_configuration":"{\r\n                    \"sg-recommended by shipper\": \"shipperid_Recommended by Shipper\",\r\n                    \"sg-freeshipping\": \"freeshipping_freeshipping,freeshipping_null,pickup_pickup\",\r\n                    \"sg-express\": \"shipperid_Anteraja-Next Day,shipperid_JNE-CTCYES,shipperid_JNE-YES,shipperid_Lion Parcel-ONEPACK,shipperid_Ninja Xpress-Next Day,shipperid_RPX-NDP,shipperid_SAP-One Day Service,shipperid_SiCepat-BEST,shipperid_Tiki-ONS,logistix_JNE-YES,logistix_JNE-CTC,logistix_JNE-CTCYES,logistix_SICEPAT-BEST,logistix_ANTERAJA-NEXTDAY,popaket_JNE-SPS19,popaket_JNE-YES19,popaket_SiCepat-BEST,popaket_SAP Logistic-UDRONS,popaket_SAP Logistic-DRSDS,popaket_Wahana-DETUX,popaket_Tiki-ONSTIKI,popaket_Tiki-TDSTIKI,popaket_RPX-PSM,popaket_RPX-PSN,popaket_REX-REXEXPRESS,popaket_REX-REX-1,popaket_POS Indonesia-240,popaket_POS Indonesia-2Q9,popaket_POS Indonesia-447,popaket_Lion Parcel-DOCUMENT-ONEPACK,popaket_Lion Parcel-PACKAGE-ONEPACK,popaket_AlfaTrex-ODPOP,popaket_AlfaTrex-NDSALF,popaket_POPExpress-EXPPOP,popaket_AnterAja-NDAJA,popaket_Paxel-PAXELND\",\r\n                    \"sg-sameday\": \"gosend_sameday,grabexpress_same_day,grabexpress_null,gosend_null,shipperid_Anteraja-Same Day,shipperid_GO SEND-Same Day,shipperid_Grab Express-Same Day,logistix_GOSEND-SAMEDAY,logistix_GRAB-SAMEDAY,logistix_PAXEL-SAMEDAY,logistix_ANTERAJA-SAMEDAY,popaket_SiCepat-SDS,popaket_Tiki-SDSTIKI,popaket_RPX-PSS,popaket_AlfaTrex-SDSALF,popaket_Grab-SDSGRAB,popaket_AnterAja-SDAJA,popaket_AnterAja-SDSAJA,popaket_Paxel-PAXELSD,popaket_Go Send-SAMEDAYGOJEK,popaket_Borzo-same_day\",\r\n                    \"sg-instant\": \"gosend_instant,grabexpress_instant,shipperid_GO SEND-Instant,shipperid_Grab Express-Instant,logistix_GOSEND-INSTANT,logistix_GRAB-INSTANT,popaket_Lalamove-MOTORCYCLELALA,popaket_Lalamove-MPVLALA,popaket_Lalamove-TRUCK175LALA,popaket_Lalamove-VANLALA,popaket_Lalamove-SEDANLALA,popaket_Grab-BULKGRAB,popaket_Grab-INSGRAB,popaket_Go Send-INSTANTGOJEK,popaket_Deliveree-deetrontonbox,popaket_Deliveree-deetrontonwingbox,popaket_Deliveree-deefusoheavy,popaket_Deliveree-deefusolite,popaket_Deliveree-deedoubleengkelpickup,popaket_Deliveree-deeengkelbox,popaket_Deliveree-deeengkelpickup,popaket_Deliveree-deesmallpickup,popaket_Deliveree-deevan,popaket_Deliveree-deeeconomy,popaket_Borzo-standardbike,popaket_Borzo-standardvan,popaket_Borzo-standardcar,popaket_Borzo-standardsuv,popaket_Borzo-standardminivan\",\r\n                    \"sg-reguler\": \"advancerate_null,advancerate_advancedmatrix,flatrate_flatrate,tablerate_bestway,shipperid_Anteraja-Regular,shipperid_J&T-Express,shipperid_JNE-CTC,shipperid_JNE-OKE,shipperid_JNE-REG,shipperid_Lion Parcel-REGPACK,shipperid_Ninja Xpress-Standard,shipperid_RPX-RGP,shipperid_SAP-Reguler,shipperid_SiCepat-HALU,shipperid_SiCepat-REG,shipperid_Tiki-ECO,shipperid_Tiki-REG,shipperid_Wahana-Regular,logistix_JNE-CTC,logistix_JNE-REG,logistix_SICEPAT-REG,logistix_POS,logistix_JNT-EZ,logistix_ANTERAJA-REG,shipperid_null,popaket_null,popaket_JNE-OKE19,popaket_JNE-REG19,popaket_SiCepat-HALU,popaket_SiCepat-SIUNT,popaket_SiCepat-REG,popaket_SAP Logistic-UDRREG,popaket_Wahana-DTUK,popaket_Wahana-DENO,popaket_Tiki-REGTIKI,popaket_Tiki-ECOTIKI,popaket_RPX-PSR,popaket_Ninja Xpress-STD,popaket_REX-REX-10,popaket_REX-REXREGULAR,popaket_POS Indonesia-PVG,popaket_POS Indonesia-311,popaket_POS Indonesia-PJE,popaket_POS Indonesia-PJB,popaket_POS Indonesia-PDG,popaket_Lion Parcel-PACKAGE-LANDPACK,popaket_Lion Parcel-DOCUMENT-REGPACK,popaket_Lion Parcel-PACKAGE-REGPACK,popaket_AlfaTrex-ECSALF,popaket_AlfaTrex-RGSALF,popaket_PopExpress-REGPOP,popaket_AnterAja-REGAJA,popaket_J&T Express-EZ\",\r\n                    \"sg-trucking\": \"shipperid_Indah Cargo-Laut,shipperid_Dakota Cargo-Reguler,shipperid_Indah Cargo-Darat,shipperid_JNE-JTR,logistix_JNE-JTR,shipperid_SiCepat-GOKIL,logistix_SICEPAT-GOKIL,popaket_JNE-JTR18,popaket_JNE-JTR250,popaket_JNE-JTR<150,popaket_JNE-JTR>250, popaket_SiCepat-CARGO,popaket_SiCepat-GOKIL,popaket_SAP Logistic-DRGREG,popaket_Tiki-TRCTIKI,popaket_Tiki-T15TIKI,popaket_Tiki-T25TIKI,popaket_Tiki-T60TIKI,popaket_Indah Logistik-LAUT,popaket_Indah Logistik-DARAT,popaket_Indah Logistik-TRUCK,popaket_Indah Logistik-TOWING,popaket_Indah Logistik-CITY,popaket_Indah Logistik-UDARA,popaket_Sentral Cargo-DARAT-ELEKTRONIK,popaket_Sentral Cargo-DARATSENTRAL,popaket_Sentral Cargo-DARAT-NON ELEKTRONIK,popaket_Sentral Cargo-UDARA-ELEKTRONIK,popaket_Sentral Cargo-UDARA-NON ELEKTRONIK,popaket_Sentral Cargo-UDARASENTRAL\",\r\n                    \"sg-international\": \"shipperid_DPEX-EXPRESS PARCEL,shipperid_JNE-INTL,popaket_Wahana-SG00\"\r\n                    }\r\n                ","payments_configuration":"{\"pg-banktransfer\":\"snap_banktransfer,snap_banktransfer_bca,snap_banktransfer_bni,banktransfer,snap_banktransfer_permata\",\"pg-installment\":\"snap_mandiri_installment,snap_bca_installment,snap_bni_installment,snap_mandiri_installment_3,snap_mandiri_installment_6,snap_mandiri_installment_12,snap_bca_installment,snap_maybank_installment,snap_bni_installment_3,snap_bni_installment_6,snap_bni_installment_12,\",\"pg-creditcard\":\"snap_creditcardbin,snap_creditcard,travelokapay\",\"pg-internetpayment\":\"snap_cimbclicks,snap_bcaklikpay,snap_klikbca,snap_alfamart,snap_indomaret,snap_klikbca,snap_gopay,snap_bcaklikpay,ipay88_ovo\",\"pg-others\":\"checkmo,cashondelivery,snap_mandiri_bill_payment,xendit,cc,alfamart,bcava,bniva,briva,mandiriva,permatava,dana,dd_bri,indomaret,linkaja,ovo,cc_subscription,kredivo,qr_codes\"}","pwa":{"use_cms_page_enable":true,"use_cms_page_identifier":"pwa-homepage","banner_slider_enable":false,"banner_slider_title":null,"category_list_enable":false,"category_list_url_key":null,"category_list_image_size_desktop_height":null,"category_list_image_size_desktop_width":null,"category_list_image_size_mobile_height":null,"category_list_image_size_mobile_width":null,"features_product_enable":false,"features_product_url_key":null,"primary_color":null,"secondary_color":null,"background_color":null,"error_color":null,"warning_msg_color":null,"success_msg_color":null,"font_color":null,"default_font":"0","heading_font":"0","button_background_color":null,"button_background_hover_color":null,"button_disabled_text_color":null,"button_disabled_background_color":null,"button_text_color":null,"button_text_hover_color":null,"button_border_color":null,"button_border_hover_color":null,"link_color":null,"link_hover_color":null,"link_font_decoration":null,"link_font_hover_decoration":null,"add_to_cart_enable":false,"app_name":"Swift PWA","cms_contact_identifiers":"contact-us-info","cms_social_media_link_identifer":"pwa_socmed_links","configurable_options_enable":false,"custom_install_app_enable":true,"default_robot":"INDEX,FOLLOW","drawer_filter_on_desktop_enable":false,"enabler_footer_mobile":true,"enabler_sticky_header":true,"facebook_app_id":null,"facebook_meta_id_app_id":null,"facebook_meta_id_enable":false,"footer_version":"pwa_footer_v1","header_version":"v1","home_slider_desktop_height":"750","home_slider_desktop_width":"1800","home_slider_mobile_height":"750","home_slider_mobile_width":"960","icon_apple_touch":null,"image_category_height":"577","image_category_width":"960","image_product_height":"300","image_product_width":"240","thumbor_enable":true,"thumbor_https_http":false,"thumbor_url":"https://thumbor.sirclocdn.com/unsafe/widthxheight/filters:format(webp)/","install_message":"Get free app","label_enable":true,"label_new_enable":false,"label_sale_enable":false,"label_weltpixel_enable":true,"magezon_slider_desktop_height":"750","magezon_slider_desktop_width":"1800","magezon_slider_mobile_height":"750","magezon_slider_mobile_width":"960","mobile_navigation":"bottom_navigation","page_size":"10","paypal_debug":false,"paypal_enable":false,"paypal_merchant_id":"CXCQMWK6ZNELQ","popup_detail_image_enable":true,"promo_banner_lite_after_width":"350","promo_banner_lite_label_width":"350","promo_banner_lite_top_width":"1300","quick_view_enable":true,"rating_enable":false,"recaptcha_contact_enable":false,"recaptcha_enable":false,"recaptcha_login_enable":false,"recaptcha_register_enable":false,"recaptcha_server_key_dev":null,"recaptcha_server_key_local":null,"recaptcha_server_key_prod":null,"recaptcha_server_key_stage":null,"recaptcha_site_key_dev":null,"recaptcha_site_key_local":null,"recaptcha_site_key_prod":null,"recaptcha_site_key_stage":null,"remove_decimal_price_enable":true,"share_icon_email":false,"share_icon_facebook":true,"share_icon_line":false,"share_icon_linkedin":false,"share_icon_pinterest":true,"share_icon_telegram":false,"share_icon_twitter":true,"ves_menu_alias":"top-menu","ves_menu_enable":true},"store_name":"v1","welcome":"Default welcome msg!","timezone":"Asia/Jakarta","title_prefix":null,"title_suffix":null,"title_separator":"-","website_id":1,"weight_unit":"lbs","oauth_access_token_lifetime_customer":"1","pwa_checkout_debug_enable":null,"snap_client_key":"SB-Mid-client-hxJtckX_vnT7odR0","allow_guest_checkout":true,"snap_is_production":"0","aw_blog_general_enabled":"1","pickup_store":true,"cookie_restriction":false,"login_phone_password":false,"forgot_password_phone":false,"global_promo":{"enable":false,"text_color":"#B05D5D","background_color":"#FFE8E8"},"weltpixel_newsletter_general_enable":"1","weltpixel_newsletter_general_version":"3","weltpixel_newsletter_general_overlay_color":"#000000","weltpixel_newsletter_general_overlay_opacity":"0.8","weltpixel_newsletter_general_display_mode":"1","weltpixel_newsletter_general_display_mobile":"1","weltpixel_newsletter_general_mobile_version":"3","weltpixel_newsletter_general_popup_cookie_lifetime":"4","weltpixel_newsletter_general_terms_conditions_consent":"1","weltpixel_newsletter_general_terms_conditions_text":"<a href=\"https://pearl.weltpixel.com/privacy-policy-cookie-restriction-mode\" target=\"_blank\">I agree to the Privacy Policy. </a>","weltpixel_newsletter_general_enable_trigger_button":"1","weltpixel_newsletter_general_trigger_button_title":"WANT A DISCOUNT?","weltpixel_newsletter_general_trigger_button_color":"#FFFFFF","weltpixel_newsletter_general_trigger_button_backgroundcolor":"#000000","aw_blog_general_comments_enabled":null,"aw_blog_general_disqus_forum_code":null,"aw_blog_related_products_block_layout":null,"aw_blog_related_products_block_position":"not_display","aw_blog_related_products_products_limit":8,"aw_blog_related_products_display_add_to_cart":null,"weltpixel_RecentlyViewedBar_general_enable":"0","weltpixel_thankyoupage_create_account_enable":true,"payment_travelokapay_public_key":"xnd_public_development_uxS0yhNGTVT4BDaDWRuy0pjmB5YMWxvHhFf6qLAO6x5jSzVSQQplMi8AyBy","payment_travelokapay_user_id":"621610c74c98b14ae3006a78","payment_travelokapay_bin_whitelist":null,"pin_location_latitude":-6.227599,"pin_location_longitude":106.8242503,"minimum_order_amount":null,"minimum_order_enable":null,"OmsRma":{"enable_oms_rma":null,"enable_oms_pwa_request_return":false,"oms_rma_link":"https://b2cdemo.getswift.asia/aw_rma/customer/"},"oms_channel_code":"SWI"}}
+\ No newline at end of file
+diff --git a/core/api/rest/config/index.js b/core/api/rest/config/index.js
+new file mode 100644
+index 000000000..07dcf9931
+--- /dev/null
++++ b/core/api/rest/config/index.js
+@@ -0,0 +1,12 @@
++const fs = require('fs');
++
++module.exports = (req, res) => {
++    fs.readFile('./core/api/rest/config/config2.json', 'utf8', (err, jsonString) => {
++        if (err) {
++            console.log('File read failed:', err);
++            res.status(500).json(err);
++            return;
++        }
++        res.status(200).json(JSON.parse(jsonString));
++    });
++};
+diff --git a/core/api/rest/request/index.js b/core/api/rest/request/index.js
+new file mode 100644
+index 000000000..4d2eb5c0a
+--- /dev/null
++++ b/core/api/rest/request/index.js
+@@ -0,0 +1,9 @@
++function requestInternal() {
++    return new Promise((resolve) => {
++        fetch('http://localhost:3000/getConfig')
++            .then((response) => response.json())
++            .then((data) => resolve(data));
++    });
++}
++
++module.exports = requestInternal;
+diff --git a/core/modules/home/pages/default/components/index.js b/core/modules/home/pages/default/components/index.js
+index c06cb8629..f13fa5285 100644
+--- a/core/modules/home/pages/default/components/index.js
++++ b/core/modules/home/pages/default/components/index.js
+@@ -17,7 +17,6 @@ const Content = (props) => {
+     const {
+         homePageConfig, storeConfig: config, ...other
+     } = props;
+-
+     let storeConfig = config;
+ 
+     if (homePageConfig && homePageConfig.storeConfig && homePageConfig.storeConfig.pwa) {
+diff --git a/core/modules/home/pages/default/core.js b/core/modules/home/pages/default/core.js
+index 84902c09b..6800d49ac 100644
+--- a/core/modules/home/pages/default/core.js
++++ b/core/modules/home/pages/default/core.js
+@@ -1,3 +1,4 @@
++/* eslint-disable no-unused-vars */
+ import Layout from '@layout';
+ import { getHost } from '@helper_config';
+ import { setLocalStorage } from '@helper_localstorage';
+@@ -8,12 +9,11 @@ import Cookies from 'js-cookie';
+ 
+ const HomeCore = (props) => {
+     // eslint-disable-next-line object-curly-newline
+-    const { pageConfig, storeConfig, homePageConfig, ...other } = props;
++    const { pageConfig, storeConfig, ...other } = props;
+ 
+     const homeKey = keyLocalStorage.home;
+ 
+-    if (typeof window !== 'undefined' && homePageConfig) {
+-        setLocalStorage(homeKey, homePageConfig);
++    if (typeof window !== 'undefined' && storeConfig) {
+         const appCurrency = Cookies.get('app_currency');
+         currencyVar({
+             currency: storeConfig.base_currency_code,
+@@ -55,7 +55,7 @@ const HomeCore = (props) => {
+ 
+     return (
+         <Layout {...props} pageConfig={config} isHomepage>
+-            <Content storeConfig={storeConfig} homePageConfig={homePageConfig} {...other} />
++            <Content storeConfig={storeConfig} homePageConfig={{ storeConfig }} {...other} />
+         </Layout>
+     );
+ };
+diff --git a/core/modules/home/pages/default/index.js b/core/modules/home/pages/default/index.js
+index 90525489b..0217b85b7 100644
+--- a/core/modules/home/pages/default/index.js
++++ b/core/modules/home/pages/default/index.js
+@@ -1,3 +1,5 @@
++/* eslint-disable arrow-body-style */
++/* eslint-disable no-unused-vars */
+ import { withTranslation } from '@i18n';
+ import { withApollo } from '@lib_apollo';
+ import dynamic from 'next/dynamic';
+@@ -11,22 +13,10 @@ const Page = dynamic(() => ((!modules.checkout.checkoutOnly)
+     : import('@module_checkout/pages/default')));
+ 
+ Page.getInitialProps = async (ctx) => {
+-    let homePageConfig;
+-
+-    if (!modules.checkout.checkoutOnly && ctx && ctx.req) {
+-        homePageConfig = await graphRequest(getHomePageConfig);
+-    } else if (!modules.checkout.checkoutOnly && typeof window !== 'undefined') {
+-        homePageConfig = getLocalStorage(keyLocalStorage.home);
+-        if (!homePageConfig) {
+-            homePageConfig = await graphRequest(getHomePageConfig);
+-        }
+-    }
+-
+     return {
+         namespacesRequired: modules.checkout.checkoutOnly
+             ? ['common', 'checkout', 'customer', 'validate']
+             : ['common', 'home'],
+-        homePageConfig,
+     };
+ };
+ 
+diff --git a/core/modules/theme/pages/_app.js b/core/modules/theme/pages/_app.js
+index 3ea2cdd57..91dc7e690 100644
+--- a/core/modules/theme/pages/_app.js
++++ b/core/modules/theme/pages/_app.js
+@@ -1,3 +1,5 @@
++/* eslint-disable max-len */
++/* eslint-disable no-console */
+ /* eslint-disable no-underscore-dangle */
+ /* eslint-disable class-methods-use-this */
+ /* eslint-disable func-names */
+@@ -32,6 +34,7 @@ import PageProgressLoader from '@common_loaders/PageProgress';
+ import getConfig from 'next/config';
+ import routeMiddleware from '@middleware_route';
+ import graphRequest from '@graphql_request';
++import requestInternal from '@rest_request';
+ import Notification from '@lib_firebase/notification';
+ import firebase from '@lib_firebase/index';
+ import { gql } from '@apollo/client';
+@@ -143,9 +146,8 @@ class MyApp extends App {
+         }
+         if (typeof window === 'undefined' && (!storeConfig || typeof storeConfig.secure_base_media_url === 'undefined')) {
+             // storeConfig = await apolloClient.query({ query: ConfigSchema }).then(({ data }) => data.storeConfig);
+-            storeConfig = await graphRequest(ConfigSchema);
+-            frontendOptions = await graphRequest(FrontendSchema);
+-
++            storeConfig = await requestInternal();
++            frontendOptions = storeConfig;
+             // Handle redirecting to tomaintenance page automatically when GQL is in maintenance mode.
+             // We do this here since query storeConfig is the first query and be done in server side
+             if (ctx && storeConfig.response && storeConfig.response.status && storeConfig.response.status > 500) {
+@@ -154,7 +156,7 @@ class MyApp extends App {
+             storeConfig = storeConfig.storeConfig;
+             if (!modules.checkout.checkoutOnly) {
+                 dataVesMenu = storeConfig.pwa.ves_menu_enable
+-                    ? await graphRequest(getVesMenu, { alias: storeConfig.pwa.ves_menu_alias }) : await graphRequest(getCategories);
++                    ? await graphRequest(getVesMenu, { alias: storeConfig.pwa.ves_menu_alias }, {}, { method: 'GET' }) : await graphRequest(getCategories, {}, {}, { method: 'GET' });
+             }
+             frontendOptions = frontendOptions.storeConfig;
+             removeDecimalConfig = storeConfig?.pwa?.remove_decimal_price_enable !== null
+@@ -173,6 +175,7 @@ class MyApp extends App {
+ 
+                 storeConfig = storeConfig.storeConfig;
+             }
++            console.log(storeConfig);
+             if (!modules.checkout.checkoutOnly) {
+                 dataVesMenu = getLocalStorage('pwa_vesmenu');
+                 if (!dataVesMenu) {
+diff --git a/ecosystem.config.js b/ecosystem.config.js
+new file mode 100644
+index 000000000..fba6b0174
+--- /dev/null
++++ b/ecosystem.config.js
+@@ -0,0 +1,11 @@
++module.exports = {
++    apps: [{
++        name: 'swift-pwa',
++        script: './server.js',
++        env: {
++            NODE_ENV: 'production',
++            APP_ENV: 'prod',
++            NODE_TLS_REJECT_UNAUTHORIZED: 0,
++        },
++    }],
++};
+diff --git a/jsconfig.json b/jsconfig.json
+index 8dfca9fab..3715be1a8 100644
+--- a/jsconfig.json
++++ b/jsconfig.json
+@@ -29,6 +29,7 @@
+             "@next_headcustom": ["src/nextjs_custom/HeadCustom", "core/nextjs_custom/HeadCustom"],
+             "@next_nextscriptcustom": ["src/nextjs_custom/NextScriptCustom", "core/nextjs_custom/NextScriptCustom"],
+             "@graphql_request": ["src/api/graphql/request", "core/api/graphql/request"],
++            "@rest_request": ["src/api/rest/request", "core/api/rest/request"],
+ 
+             "@lib/*": ["src/lib/*", "core/lib/*"],
+             "@lib_apollo": ["src/lib/apollo", "core/lib/apollo"],
+diff --git a/load.sh b/load.sh
+new file mode 100755
+index 000000000..97bc611bd
+--- /dev/null
++++ b/load.sh
+@@ -0,0 +1,22 @@
++#! /bin/bash
++
++max="$1"
++date
++echo "url: $2
++rate: $max calls / second"
++START=$(date +%s);
++
++get () {
++  curl -s -v "$1" 2>&1 | tr '\r\n' '\\n' | awk -v date="$(date +'%r')" '{print $0"\n-----", date}' >> /tmp/perf-test.log
++}
++
++while true
++do
++  echo $(($(date +%s) - START)) | awk '{print int($1/60)":"int($1%60)}'
++  sleep 1
++
++  for i in `seq 1 $max`
++  do
++    get $2 &
++  done
++done
+\ No newline at end of file
+diff --git a/package.json b/package.json
+index 45d9ce30e..6fa352115 100644
+--- a/package.json
++++ b/package.json
+@@ -56,7 +56,7 @@
+     "formik": "^2.1.4",
+     "fscreen": "^1.2.0",
+     "graphql": "^15.4.0",
+-    "graphql-request": "^1.8.2",
++    "graphql-request": "^5.0.0",
+     "graphql-tools": "^7.0.1",
+     "html-react-parser": "^1.2.4",
+     "i18next": "^19.3.3",
+diff --git a/pages/test.js b/pages/test.js
+new file mode 100644
+index 000000000..0758b3644
+--- /dev/null
++++ b/pages/test.js
+@@ -0,0 +1,3 @@
++const Test = () => <p>ini test</p>;
++
++export default Test;
+diff --git a/server.js b/server.js
+index 4a8c3f1f5..e663f72dd 100644
+--- a/server.js
++++ b/server.js
+@@ -24,6 +24,7 @@ const {
+ } = require('./swift.config');
+ const { SESSION_SECRET } = require('./swift-server.config');
+ const generateXml = require('./core/api/rest/xml');
++const getConfig = require('./core/api/rest/config');
+ const captchaValidation = require('./core/api/rest/captcha');
+ const firebaseValidation = require('./core/api/rest/firebase-cloud-messaging');
+ const geocodingServices = require('./core/api/rest/geocoding');
+@@ -191,6 +192,8 @@ async function renderAndCache(req, res) {
+     // geocoding services
+     server.post('/geocoding-services', geocodingServices);
+ 
++    server.get('/getConfig', getConfig);
++
+     /**
+      * configuration firebase messaging
+      *   */
+diff --git a/swift.config.js b/swift.config.js
+index 7ed25fd64..33ba97fa9 100644
+--- a/swift.config.js
++++ b/swift.config.js
+@@ -14,8 +14,8 @@ const HOST = {
+ 
+ /* Magento GraphQL Endpoint */
+ const graphqlEndpoint = {
+-    local: 'https://swift-sprint.testingnow.me/graphql',
+-    dev: 'https://swift-sprint.testingnow.me/graphql',
++    local: 'https://b2cdemo.getswift.asia/graphql',
++    dev: 'https://upgrade244.testingnow.me/graphql',
+     stage: 'https://b2cdemonew.gcp-staging.testingnow.me/graphql',
+     prod: 'https://b2cdemo.getswift.asia/graphql',
+ };
+diff --git a/yarn.lock b/yarn.lock
+index e9530ebbb..c1fff6121 100644
+--- a/yarn.lock
++++ b/yarn.lock
+@@ -2081,6 +2081,11 @@
+   resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.1.0.tgz#0eee6373e11418bfe0b5638f654df7a4ca6a3950"
+   integrity sha512-wYn6r8zVZyQJ6rQaALBEln5B1pzxb9shV5Ef97kTvn6yVGrqyXVnDqnU24MXnFubR+rZjBY9NWuxX3FB2sTsjg==
+ 
++"@graphql-typed-document-node/core@^3.1.1":
++  version "3.1.1"
++  resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.1.1.tgz#076d78ce99822258cf813ecc1e7fa460fa74d052"
++  integrity sha512-NQ17ii0rK1b34VZonlmT2QMJFI70m0TRwbknO/ihlbatXyaktDhN/98vBiUU6kNBPljqGqyIrl2T4nY2RpFANg==
++
+ "@grpc/grpc-js@^1.0.0":
+   version "1.1.7"
+   resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.1.7.tgz#d3d71c6da95397e2d63895ccc4a05e7572f7b7e6"
+@@ -5284,14 +5289,6 @@ cross-env@^7.0.2:
+   dependencies:
+     cross-spawn "^7.0.1"
+ 
+-cross-fetch@2.2.2:
+-  version "2.2.2"
+-  resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-2.2.2.tgz#a47ff4f7fc712daba8f6a695a11c948440d45723"
+-  integrity sha1-pH/09/xxLauo9qaVoRyUhEDUVyM=
+-  dependencies:
+-    node-fetch "2.1.2"
+-    whatwg-fetch "2.0.4"
+-
+ cross-fetch@3.0.6, cross-fetch@^3.0.6:
+   version "3.0.6"
+   resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.0.6.tgz#3a4040bc8941e653e0e9cf17f29ebcd177d3365c"
+@@ -5299,6 +5296,13 @@ cross-fetch@3.0.6, cross-fetch@^3.0.6:
+   dependencies:
+     node-fetch "2.6.1"
+ 
++cross-fetch@^3.1.5:
++  version "3.1.5"
++  resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.1.5.tgz#e1389f44d9e7ba767907f7af8454787952ab534f"
++  integrity sha512-lvb1SBsI0Z7GDwmuid+mU3kWVBwTVUbe7S0H52yaaAdQOXq2YktTCZdlAcNKFzE6QtRz0snpw9bNiPeOIkkQvw==
++  dependencies:
++    node-fetch "2.6.7"
++
+ cross-spawn@^6.0.5:
+   version "6.0.5"
+   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-6.0.5.tgz#4a5ec7c64dfae22c3a14124dbacdee846d80cbc4"
+@@ -7205,12 +7209,15 @@ graphql-extensions@^0.12.6:
+     apollo-server-env "^2.4.5"
+     apollo-server-types "^0.6.1"
+ 
+-graphql-request@^1.8.2:
+-  version "1.8.2"
+-  resolved "https://registry.yarnpkg.com/graphql-request/-/graphql-request-1.8.2.tgz#398d10ae15c585676741bde3fc01d5ca948f8fbe"
+-  integrity sha512-dDX2M+VMsxXFCmUX0Vo0TopIZIX4ggzOtiCsThgtrKR4niiaagsGTDIHj3fsOMFETpa064vzovI+4YV4QnMbcg==
++graphql-request@^5.0.0:
++  version "5.0.0"
++  resolved "https://registry.yarnpkg.com/graphql-request/-/graphql-request-5.0.0.tgz#7504a807d0e11be11a3c448e900f0cc316aa18ef"
++  integrity sha512-SpVEnIo2J5k2+Zf76cUkdvIRaq5FMZvGQYnA4lUWYbc99m+fHh4CZYRRO/Ff4tCLQ613fzCm3SiDT64ubW5Gyw==
+   dependencies:
+-    cross-fetch "2.2.2"
++    "@graphql-typed-document-node/core" "^3.1.1"
++    cross-fetch "^3.1.5"
++    extract-files "^9.0.0"
++    form-data "^3.0.0"
+ 
+ graphql-subscriptions@^1.0.0:
+   version "1.1.0"
+@@ -9768,16 +9775,18 @@ no-case@^3.0.3:
+     lower-case "^2.0.1"
+     tslib "^1.10.0"
+ 
+-node-fetch@2.1.2:
+-  version "2.1.2"
+-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.1.2.tgz#ab884e8e7e57e38a944753cec706f788d1768bb5"
+-  integrity sha1-q4hOjn5X44qUR1POxwb3iNF2i7U=
+-
+ node-fetch@2.6.1, node-fetch@^2.1.2, node-fetch@^2.2.0, node-fetch@^2.3.0, node-fetch@^2.6.0, node-fetch@^2.6.1:
+   version "2.6.1"
+   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
+   integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
+ 
++node-fetch@2.6.7:
++  version "2.6.7"
++  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.7.tgz#24de9fba827e3b4ae44dc8b20256a379160052ad"
++  integrity sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==
++  dependencies:
++    whatwg-url "^5.0.0"
++
+ node-fetch@^1.0.1:
+   version "1.7.3"
+   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-1.7.3.tgz#980f6f72d85211a5347c6b2bc18c5b84c3eb47ef"
+@@ -12599,6 +12608,11 @@ tr46@^2.1.0:
+   dependencies:
+     punycode "^2.1.1"
+ 
++tr46@~0.0.3:
++  version "0.0.3"
++  resolved "https://registry.yarnpkg.com/tr46/-/tr46-0.0.3.tgz#8184fd347dac9cdc185992f3a6622e14b9d9ab6a"
++  integrity sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==
++
+ tree-kill@^1.2.2:
+   version "1.2.2"
+   resolved "https://registry.yarnpkg.com/tree-kill/-/tree-kill-1.2.2.tgz#4ca09a9092c88b73a7cdc5e8a01b507b0790a0cc"
+@@ -13117,6 +13131,11 @@ webfontloader@^1.6.28:
+   resolved "https://registry.yarnpkg.com/webfontloader/-/webfontloader-1.6.28.tgz#db786129253cb6e8eae54c2fb05f870af6675bae"
+   integrity sha1-23hhKSU8tujq5UwvsF+HCvZnW64=
+ 
++webidl-conversions@^3.0.0:
++  version "3.0.1"
++  resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-3.0.1.tgz#24534275e2a7bc6be7bc86611cc16ae0a5654871"
++  integrity sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==
++
+ webidl-conversions@^4.0.2:
+   version "4.0.2"
+   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-4.0.2.tgz#a855980b1f0b6b359ba1d5d9fb39ae941faa63ad"
+@@ -13261,6 +13280,14 @@ whatwg-mimetype@^2.3.0:
+   resolved "https://registry.yarnpkg.com/whatwg-mimetype/-/whatwg-mimetype-2.3.0.tgz#3d4b1e0312d2079879f826aff18dbeeca5960fbf"
+   integrity sha512-M4yMwr6mAnQz76TbJm914+gPpB/nCwvZbJU28cUD6dR004SAxDLOOSUaB1JDRqLtaOV/vi0IC5lEAGFgrjGv/g==
+ 
++whatwg-url@^5.0.0:
++  version "5.0.0"
++  resolved "https://registry.yarnpkg.com/whatwg-url/-/whatwg-url-5.0.0.tgz#966454e8765462e37644d3626f6742ce8b70965d"
++  integrity sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==
++  dependencies:
++    tr46 "~0.0.3"
++    webidl-conversions "^3.0.0"
++
+ whatwg-url@^7.0.0:
+   version "7.1.0"
+   resolved "https://registry.yarnpkg.com/whatwg-url/-/whatwg-url-7.1.0.tgz#c2c492f1eca612988efd3d2266be1b9fc6170d06"
+
+From ef5ead6d30f8c1dc38b7253a09b229e939ec7f83 Mon Sep 17 00:00:00 2001
+From: Asih Priyatno <asih.priyatno@sirclo.com>
+Date: Wed, 30 Nov 2022 08:05:14 +0700
+Subject: [PATCH 02/18] feat([Request Config] change host): change host
+ flexible from env
+
+---
+ core/api/rest/request/index.js | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/core/api/rest/request/index.js b/core/api/rest/request/index.js
+index 4d2eb5c0a..2a1ee4bdf 100644
+--- a/core/api/rest/request/index.js
++++ b/core/api/rest/request/index.js
+@@ -1,6 +1,11 @@
++const { getAppEnv } = require('../../../helpers/env');
++const { HOST } = require('../../../../swift.config');
++
+ function requestInternal() {
++    const appEnv = getAppEnv();
++    const url = HOST[appEnv] || HOST.prod;
+     return new Promise((resolve) => {
+-        fetch('http://localhost:3000/getConfig')
++        fetch(`${url}/getConfig`)
+             .then((response) => response.json())
+             .then((data) => resolve(data));
+     });
+
+From 2a459352c8f20d33ff440aa6c7716c956af71fc9 Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Tue, 6 Dec 2022 14:11:39 +0700
+Subject: [PATCH 03/18] fix([28923266] storeconfig - api):internal request
+ storeconfig
+
+---
+ core/api/rest/config.js           | 270 ++++++++++++++++++++++++++++++
+ core/api/rest/config/config2.json |   2 +-
+ core/api/rest/request/index.js    |   4 +-
+ core/modules/theme/pages/_app.js  |   2 +-
+ server.js                         |   4 +
+ 5 files changed, 278 insertions(+), 4 deletions(-)
+ create mode 100644 core/api/rest/config.js
+
+diff --git a/core/api/rest/config.js b/core/api/rest/config.js
+new file mode 100644
+index 000000000..6cf1caf91
+--- /dev/null
++++ b/core/api/rest/config.js
+@@ -0,0 +1,270 @@
++#! /usr/bin/env node
++const fs = require('fs');
++const path = require('path');
++const { GraphQLClient, gql } = require('graphql-request');
++const { graphqlEndpoint } = require('../../../swift.config');
++const { getAppEnv, getAccessEnv } = require('../../helpers/env');
++
++const baseDir = path.join(__dirname, '../rest/config/');
++
++const appEnv = getAppEnv();
++
++const graphQLClient = new GraphQLClient(`${graphqlEndpoint[appEnv] || graphqlEndpoint.prod}`, {
++    method: 'GET',
++    headers: {
++        Authorization: `Bearer ${getAccessEnv()}`,
++        'Content-Type': 'application/json',
++    },
++    jsonSerializer: {
++        parse: JSON.parse,
++        stringify: JSON.stringify,
++    },
++});
++
++const reqBody = gql`{
++    storeConfig {
++      secure_base_media_url
++      secure_base_static_url
++      customer_password_minimum_password_length
++      customer_password_required_character_classes_number
++      base_media_url
++      base_static_url
++      base_url
++      base_currency_code
++      code
++      catalog_search_engine
++      copyright
++      catalog_default_sort_by
++      category_url_suffix
++      default_title
++      default_keywords
++      default_description
++      default_display_currency_code
++      date_of_birth
++      gender
++      general_country_default
++      header_logo_src
++      head_shortcut_icon
++      icube_pinlocation_gmap_key
++      icube_pinlocation_geocoding_key
++      locale
++      logo_alt
++      logo_width
++      logo_height
++      shipments_configuration
++      payments_configuration
++      pwa {
++        use_cms_page_enable
++        use_cms_page_identifier
++        banner_slider_enable
++        banner_slider_title
++        category_list_enable
++        category_list_url_key            
++        category_list_image_size_desktop_height
++        category_list_image_size_desktop_width
++        category_list_image_size_mobile_height
++        category_list_image_size_mobile_width
++        features_product_enable
++        features_product_url_key
++        use_cms_page_enable
++        use_cms_page_identifier
++        banner_slider_enable
++        banner_slider_title
++        category_list_enable
++        category_list_url_key            
++        category_list_image_size_desktop_height
++        category_list_image_size_desktop_width
++        category_list_image_size_mobile_height
++        category_list_image_size_mobile_width
++        features_product_enable
++        features_product_url_key
++        primary_color
++        secondary_color
++        background_color
++        error_color
++        warning_msg_color
++        success_msg_color
++        font_color
++        default_font
++        heading_font
++        button_background_color
++        button_background_hover_color
++        button_disabled_text_color
++        button_disabled_background_color
++        button_text_color
++        button_text_hover_color
++        button_disabled_text_color
++        button_border_color
++        button_border_hover_color
++        link_color
++        link_hover_color
++        link_font_decoration
++        link_font_hover_decoration
++        add_to_cart_enable
++        app_name
++        cms_contact_identifiers
++        cms_social_media_link_identifer
++        configurable_options_enable
++        custom_install_app_enable
++        default_robot
++        drawer_filter_on_desktop_enable
++        enabler_footer_mobile
++        enabler_sticky_header
++        facebook_app_id
++        facebook_meta_id_app_id
++        facebook_meta_id_enable
++        footer_version
++        header_version
++        home_slider_desktop_height
++        home_slider_desktop_width
++        home_slider_mobile_height
++        home_slider_mobile_width
++        icon_apple_touch
++        image_category_height
++        image_category_width
++        image_product_height
++        image_product_width
++        thumbor_enable
++        thumbor_https_http
++        thumbor_url
++        install_message
++        label_enable
++        label_new_enable
++        label_sale_enable
++        label_weltpixel_enable
++        magezon_slider_desktop_height
++        magezon_slider_desktop_width
++        magezon_slider_mobile_height
++        magezon_slider_mobile_width
++        mobile_navigation
++        page_size
++        paypal_debug
++        paypal_enable
++        paypal_merchant_id
++        popup_detail_image_enable
++        promo_banner_lite_after_width
++        promo_banner_lite_label_width
++        promo_banner_lite_top_width
++        quick_view_enable
++        rating_enable
++        recaptcha_contact_enable
++        recaptcha_enable
++        recaptcha_login_enable
++        recaptcha_register_enable
++        recaptcha_server_key_dev
++        recaptcha_server_key_local
++        recaptcha_server_key_prod
++        recaptcha_server_key_stage
++        recaptcha_site_key_dev
++        recaptcha_site_key_local
++        recaptcha_site_key_prod
++        recaptcha_site_key_stage
++        remove_decimal_price_enable
++        share_icon_email
++        share_icon_facebook
++        share_icon_line
++        share_icon_linkedin
++        share_icon_pinterest
++        share_icon_telegram
++        share_icon_twitter
++        ves_menu_alias
++        ves_menu_enable
++        ves_menu_enable
++        primary_color
++        secondary_color
++        background_color
++        error_color
++        warning_msg_color
++        success_msg_color
++        font_color
++        default_font
++        heading_font
++        button_background_color
++        button_background_hover_color
++        button_disabled_text_color
++        button_disabled_background_color
++        button_text_color
++        button_text_hover_color
++        button_disabled_text_color
++        button_border_color
++        button_border_hover_color
++        link_color
++        link_hover_color
++        link_font_decoration
++        link_font_hover_decoration
++      }
++      store_name
++      welcome
++      timezone
++      title_prefix
++      title_suffix
++      title_separator
++      website_id
++      weight_unit
++      oauth_access_token_lifetime_customer
++      pwa_checkout_debug_enable
++      snap_client_key
++      allow_guest_checkout
++      snap_is_production
++      aw_blog_general_enabled
++      pickup_store
++      cookie_restriction
++      login_phone_password
++      forgot_password_phone
++      global_promo {
++        enable
++        text_color
++        background_color
++      }
++      weltpixel_newsletter_general_enable
++      weltpixel_newsletter_general_version
++      weltpixel_newsletter_general_overlay_color
++      weltpixel_newsletter_general_overlay_opacity
++      weltpixel_newsletter_general_display_mode
++      weltpixel_newsletter_general_display_mobile
++      weltpixel_newsletter_general_mobile_version
++      weltpixel_newsletter_general_popup_cookie_lifetime
++      weltpixel_newsletter_general_terms_conditions_consent
++      weltpixel_newsletter_general_terms_conditions_text
++      weltpixel_newsletter_general_enable_trigger_button
++      weltpixel_newsletter_general_trigger_button_title
++      weltpixel_newsletter_general_trigger_button_color
++      weltpixel_newsletter_general_trigger_button_backgroundcolor
++      aw_blog_general_comments_enabled
++      aw_blog_general_disqus_forum_code
++      aw_blog_related_products_block_layout
++      aw_blog_related_products_block_position
++      aw_blog_related_products_products_limit
++      aw_blog_related_products_display_add_to_cart
++      weltpixel_RecentlyViewedBar_general_enable
++      weltpixel_thankyoupage_create_account_enable
++      payment_travelokapay_public_key
++      payment_travelokapay_user_id
++      payment_travelokapay_bin_whitelist
++      pin_location_latitude
++      pin_location_longitude
++      minimum_order_amount
++      minimum_order_enable
++      OmsRma{
++        enable_oms_rma
++        enable_oms_pwa_request_return
++        oms_rma_link
++      }
++      oms_channel_code
++    }
++  }  `;
++
++const generateConfig = (req, res) => {
++    graphQLClient.request(reqBody, {}).then((data) => {
++        console.log('generate config success');
++        fs.writeFile(`${baseDir}config2.json`, JSON.stringify(data), (err) => {
++            if (err) throw err;
++        });
++        res.send(data);
++    }).catch((err) => {
++        res.status(500).json(err);
++        console.log('generate config failed', err);
++    });
++};
++
++module.exports = generateConfig;
+diff --git a/core/api/rest/config/config2.json b/core/api/rest/config/config2.json
+index 48acf6ca3..96defa293 100644
+--- a/core/api/rest/config/config2.json
++++ b/core/api/rest/config/config2.json
+@@ -1 +1 @@
+-{"storeConfig":{"secure_base_media_url":"https://b2cdemo.getswift.asia/media/","secure_base_static_url":"https://b2cdemo.getswift.asia/static/version1667899076/","customer_password_minimum_password_length":8,"customer_password_required_character_classes_number":3,"base_media_url":"https://b2cdemo.getswift.asia/media/","base_static_url":"https://b2cdemo.getswift.asia/static/version1667899076/","base_url":"https://b2cdemo.getswift.asia/","base_currency_code":"IDR","code":"v1","catalog_search_engine":"elasticsuite","copyright":"Copyright © 2013-present Magento, Inc. All rights reserved.","catalog_default_sort_by":"position","category_url_suffix":".html","default_title":"Magento Commerce","default_keywords":"swift,icube","default_description":"this is demo swift site","default_display_currency_code":"IDR","date_of_birth":null,"gender":null,"general_country_default":"ID","header_logo_src":"stores/1/icube_swift-07_copy3.png","head_shortcut_icon":"stores/1/faveicoswift.png","icube_pinlocation_gmap_key":"AIzaSyCsWgNT9vLJSzSBmJlqFdembBz4zBCLRgQ","icube_pinlocation_geocoding_key":null,"locale":"en_US","logo_alt":null,"logo_width":150,"logo_height":65,"shipments_configuration":"{\r\n                    \"sg-recommended by shipper\": \"shipperid_Recommended by Shipper\",\r\n                    \"sg-freeshipping\": \"freeshipping_freeshipping,freeshipping_null,pickup_pickup\",\r\n                    \"sg-express\": \"shipperid_Anteraja-Next Day,shipperid_JNE-CTCYES,shipperid_JNE-YES,shipperid_Lion Parcel-ONEPACK,shipperid_Ninja Xpress-Next Day,shipperid_RPX-NDP,shipperid_SAP-One Day Service,shipperid_SiCepat-BEST,shipperid_Tiki-ONS,logistix_JNE-YES,logistix_JNE-CTC,logistix_JNE-CTCYES,logistix_SICEPAT-BEST,logistix_ANTERAJA-NEXTDAY,popaket_JNE-SPS19,popaket_JNE-YES19,popaket_SiCepat-BEST,popaket_SAP Logistic-UDRONS,popaket_SAP Logistic-DRSDS,popaket_Wahana-DETUX,popaket_Tiki-ONSTIKI,popaket_Tiki-TDSTIKI,popaket_RPX-PSM,popaket_RPX-PSN,popaket_REX-REXEXPRESS,popaket_REX-REX-1,popaket_POS Indonesia-240,popaket_POS Indonesia-2Q9,popaket_POS Indonesia-447,popaket_Lion Parcel-DOCUMENT-ONEPACK,popaket_Lion Parcel-PACKAGE-ONEPACK,popaket_AlfaTrex-ODPOP,popaket_AlfaTrex-NDSALF,popaket_POPExpress-EXPPOP,popaket_AnterAja-NDAJA,popaket_Paxel-PAXELND\",\r\n                    \"sg-sameday\": \"gosend_sameday,grabexpress_same_day,grabexpress_null,gosend_null,shipperid_Anteraja-Same Day,shipperid_GO SEND-Same Day,shipperid_Grab Express-Same Day,logistix_GOSEND-SAMEDAY,logistix_GRAB-SAMEDAY,logistix_PAXEL-SAMEDAY,logistix_ANTERAJA-SAMEDAY,popaket_SiCepat-SDS,popaket_Tiki-SDSTIKI,popaket_RPX-PSS,popaket_AlfaTrex-SDSALF,popaket_Grab-SDSGRAB,popaket_AnterAja-SDAJA,popaket_AnterAja-SDSAJA,popaket_Paxel-PAXELSD,popaket_Go Send-SAMEDAYGOJEK,popaket_Borzo-same_day\",\r\n                    \"sg-instant\": \"gosend_instant,grabexpress_instant,shipperid_GO SEND-Instant,shipperid_Grab Express-Instant,logistix_GOSEND-INSTANT,logistix_GRAB-INSTANT,popaket_Lalamove-MOTORCYCLELALA,popaket_Lalamove-MPVLALA,popaket_Lalamove-TRUCK175LALA,popaket_Lalamove-VANLALA,popaket_Lalamove-SEDANLALA,popaket_Grab-BULKGRAB,popaket_Grab-INSGRAB,popaket_Go Send-INSTANTGOJEK,popaket_Deliveree-deetrontonbox,popaket_Deliveree-deetrontonwingbox,popaket_Deliveree-deefusoheavy,popaket_Deliveree-deefusolite,popaket_Deliveree-deedoubleengkelpickup,popaket_Deliveree-deeengkelbox,popaket_Deliveree-deeengkelpickup,popaket_Deliveree-deesmallpickup,popaket_Deliveree-deevan,popaket_Deliveree-deeeconomy,popaket_Borzo-standardbike,popaket_Borzo-standardvan,popaket_Borzo-standardcar,popaket_Borzo-standardsuv,popaket_Borzo-standardminivan\",\r\n                    \"sg-reguler\": \"advancerate_null,advancerate_advancedmatrix,flatrate_flatrate,tablerate_bestway,shipperid_Anteraja-Regular,shipperid_J&T-Express,shipperid_JNE-CTC,shipperid_JNE-OKE,shipperid_JNE-REG,shipperid_Lion Parcel-REGPACK,shipperid_Ninja Xpress-Standard,shipperid_RPX-RGP,shipperid_SAP-Reguler,shipperid_SiCepat-HALU,shipperid_SiCepat-REG,shipperid_Tiki-ECO,shipperid_Tiki-REG,shipperid_Wahana-Regular,logistix_JNE-CTC,logistix_JNE-REG,logistix_SICEPAT-REG,logistix_POS,logistix_JNT-EZ,logistix_ANTERAJA-REG,shipperid_null,popaket_null,popaket_JNE-OKE19,popaket_JNE-REG19,popaket_SiCepat-HALU,popaket_SiCepat-SIUNT,popaket_SiCepat-REG,popaket_SAP Logistic-UDRREG,popaket_Wahana-DTUK,popaket_Wahana-DENO,popaket_Tiki-REGTIKI,popaket_Tiki-ECOTIKI,popaket_RPX-PSR,popaket_Ninja Xpress-STD,popaket_REX-REX-10,popaket_REX-REXREGULAR,popaket_POS Indonesia-PVG,popaket_POS Indonesia-311,popaket_POS Indonesia-PJE,popaket_POS Indonesia-PJB,popaket_POS Indonesia-PDG,popaket_Lion Parcel-PACKAGE-LANDPACK,popaket_Lion Parcel-DOCUMENT-REGPACK,popaket_Lion Parcel-PACKAGE-REGPACK,popaket_AlfaTrex-ECSALF,popaket_AlfaTrex-RGSALF,popaket_PopExpress-REGPOP,popaket_AnterAja-REGAJA,popaket_J&T Express-EZ\",\r\n                    \"sg-trucking\": \"shipperid_Indah Cargo-Laut,shipperid_Dakota Cargo-Reguler,shipperid_Indah Cargo-Darat,shipperid_JNE-JTR,logistix_JNE-JTR,shipperid_SiCepat-GOKIL,logistix_SICEPAT-GOKIL,popaket_JNE-JTR18,popaket_JNE-JTR250,popaket_JNE-JTR<150,popaket_JNE-JTR>250, popaket_SiCepat-CARGO,popaket_SiCepat-GOKIL,popaket_SAP Logistic-DRGREG,popaket_Tiki-TRCTIKI,popaket_Tiki-T15TIKI,popaket_Tiki-T25TIKI,popaket_Tiki-T60TIKI,popaket_Indah Logistik-LAUT,popaket_Indah Logistik-DARAT,popaket_Indah Logistik-TRUCK,popaket_Indah Logistik-TOWING,popaket_Indah Logistik-CITY,popaket_Indah Logistik-UDARA,popaket_Sentral Cargo-DARAT-ELEKTRONIK,popaket_Sentral Cargo-DARATSENTRAL,popaket_Sentral Cargo-DARAT-NON ELEKTRONIK,popaket_Sentral Cargo-UDARA-ELEKTRONIK,popaket_Sentral Cargo-UDARA-NON ELEKTRONIK,popaket_Sentral Cargo-UDARASENTRAL\",\r\n                    \"sg-international\": \"shipperid_DPEX-EXPRESS PARCEL,shipperid_JNE-INTL,popaket_Wahana-SG00\"\r\n                    }\r\n                ","payments_configuration":"{\"pg-banktransfer\":\"snap_banktransfer,snap_banktransfer_bca,snap_banktransfer_bni,banktransfer,snap_banktransfer_permata\",\"pg-installment\":\"snap_mandiri_installment,snap_bca_installment,snap_bni_installment,snap_mandiri_installment_3,snap_mandiri_installment_6,snap_mandiri_installment_12,snap_bca_installment,snap_maybank_installment,snap_bni_installment_3,snap_bni_installment_6,snap_bni_installment_12,\",\"pg-creditcard\":\"snap_creditcardbin,snap_creditcard,travelokapay\",\"pg-internetpayment\":\"snap_cimbclicks,snap_bcaklikpay,snap_klikbca,snap_alfamart,snap_indomaret,snap_klikbca,snap_gopay,snap_bcaklikpay,ipay88_ovo\",\"pg-others\":\"checkmo,cashondelivery,snap_mandiri_bill_payment,xendit,cc,alfamart,bcava,bniva,briva,mandiriva,permatava,dana,dd_bri,indomaret,linkaja,ovo,cc_subscription,kredivo,qr_codes\"}","pwa":{"use_cms_page_enable":true,"use_cms_page_identifier":"pwa-homepage","banner_slider_enable":false,"banner_slider_title":null,"category_list_enable":false,"category_list_url_key":null,"category_list_image_size_desktop_height":null,"category_list_image_size_desktop_width":null,"category_list_image_size_mobile_height":null,"category_list_image_size_mobile_width":null,"features_product_enable":false,"features_product_url_key":null,"primary_color":null,"secondary_color":null,"background_color":null,"error_color":null,"warning_msg_color":null,"success_msg_color":null,"font_color":null,"default_font":"0","heading_font":"0","button_background_color":null,"button_background_hover_color":null,"button_disabled_text_color":null,"button_disabled_background_color":null,"button_text_color":null,"button_text_hover_color":null,"button_border_color":null,"button_border_hover_color":null,"link_color":null,"link_hover_color":null,"link_font_decoration":null,"link_font_hover_decoration":null,"add_to_cart_enable":false,"app_name":"Swift PWA","cms_contact_identifiers":"contact-us-info","cms_social_media_link_identifer":"pwa_socmed_links","configurable_options_enable":false,"custom_install_app_enable":true,"default_robot":"INDEX,FOLLOW","drawer_filter_on_desktop_enable":false,"enabler_footer_mobile":true,"enabler_sticky_header":true,"facebook_app_id":null,"facebook_meta_id_app_id":null,"facebook_meta_id_enable":false,"footer_version":"pwa_footer_v1","header_version":"v1","home_slider_desktop_height":"750","home_slider_desktop_width":"1800","home_slider_mobile_height":"750","home_slider_mobile_width":"960","icon_apple_touch":null,"image_category_height":"577","image_category_width":"960","image_product_height":"300","image_product_width":"240","thumbor_enable":true,"thumbor_https_http":false,"thumbor_url":"https://thumbor.sirclocdn.com/unsafe/widthxheight/filters:format(webp)/","install_message":"Get free app","label_enable":true,"label_new_enable":false,"label_sale_enable":false,"label_weltpixel_enable":true,"magezon_slider_desktop_height":"750","magezon_slider_desktop_width":"1800","magezon_slider_mobile_height":"750","magezon_slider_mobile_width":"960","mobile_navigation":"bottom_navigation","page_size":"10","paypal_debug":false,"paypal_enable":false,"paypal_merchant_id":"CXCQMWK6ZNELQ","popup_detail_image_enable":true,"promo_banner_lite_after_width":"350","promo_banner_lite_label_width":"350","promo_banner_lite_top_width":"1300","quick_view_enable":true,"rating_enable":false,"recaptcha_contact_enable":false,"recaptcha_enable":false,"recaptcha_login_enable":false,"recaptcha_register_enable":false,"recaptcha_server_key_dev":null,"recaptcha_server_key_local":null,"recaptcha_server_key_prod":null,"recaptcha_server_key_stage":null,"recaptcha_site_key_dev":null,"recaptcha_site_key_local":null,"recaptcha_site_key_prod":null,"recaptcha_site_key_stage":null,"remove_decimal_price_enable":true,"share_icon_email":false,"share_icon_facebook":true,"share_icon_line":false,"share_icon_linkedin":false,"share_icon_pinterest":true,"share_icon_telegram":false,"share_icon_twitter":true,"ves_menu_alias":"top-menu","ves_menu_enable":true},"store_name":"v1","welcome":"Default welcome msg!","timezone":"Asia/Jakarta","title_prefix":null,"title_suffix":null,"title_separator":"-","website_id":1,"weight_unit":"lbs","oauth_access_token_lifetime_customer":"1","pwa_checkout_debug_enable":null,"snap_client_key":"SB-Mid-client-hxJtckX_vnT7odR0","allow_guest_checkout":true,"snap_is_production":"0","aw_blog_general_enabled":"1","pickup_store":true,"cookie_restriction":false,"login_phone_password":false,"forgot_password_phone":false,"global_promo":{"enable":false,"text_color":"#B05D5D","background_color":"#FFE8E8"},"weltpixel_newsletter_general_enable":"1","weltpixel_newsletter_general_version":"3","weltpixel_newsletter_general_overlay_color":"#000000","weltpixel_newsletter_general_overlay_opacity":"0.8","weltpixel_newsletter_general_display_mode":"1","weltpixel_newsletter_general_display_mobile":"1","weltpixel_newsletter_general_mobile_version":"3","weltpixel_newsletter_general_popup_cookie_lifetime":"4","weltpixel_newsletter_general_terms_conditions_consent":"1","weltpixel_newsletter_general_terms_conditions_text":"<a href=\"https://pearl.weltpixel.com/privacy-policy-cookie-restriction-mode\" target=\"_blank\">I agree to the Privacy Policy. </a>","weltpixel_newsletter_general_enable_trigger_button":"1","weltpixel_newsletter_general_trigger_button_title":"WANT A DISCOUNT?","weltpixel_newsletter_general_trigger_button_color":"#FFFFFF","weltpixel_newsletter_general_trigger_button_backgroundcolor":"#000000","aw_blog_general_comments_enabled":null,"aw_blog_general_disqus_forum_code":null,"aw_blog_related_products_block_layout":null,"aw_blog_related_products_block_position":"not_display","aw_blog_related_products_products_limit":8,"aw_blog_related_products_display_add_to_cart":null,"weltpixel_RecentlyViewedBar_general_enable":"0","weltpixel_thankyoupage_create_account_enable":true,"payment_travelokapay_public_key":"xnd_public_development_uxS0yhNGTVT4BDaDWRuy0pjmB5YMWxvHhFf6qLAO6x5jSzVSQQplMi8AyBy","payment_travelokapay_user_id":"621610c74c98b14ae3006a78","payment_travelokapay_bin_whitelist":null,"pin_location_latitude":-6.227599,"pin_location_longitude":106.8242503,"minimum_order_amount":null,"minimum_order_enable":null,"OmsRma":{"enable_oms_rma":null,"enable_oms_pwa_request_return":false,"oms_rma_link":"https://b2cdemo.getswift.asia/aw_rma/customer/"},"oms_channel_code":"SWI"}}
+\ No newline at end of file
++{"storeConfig":{"secure_base_media_url":"https://swift.testingnow.me/media/","secure_base_static_url":"https://swift.testingnow.me/static/","customer_password_minimum_password_length":8,"customer_password_required_character_classes_number":3,"base_media_url":"https://swift.testingnow.me/media/","base_static_url":"https://swift.testingnow.me/static/","base_url":"https://swift.testingnow.me/","base_currency_code":"USD","code":"v1","catalog_search_engine":"elasticsuite","copyright":"Copyright © 2013-present Magento, Inc. All rights reserved.","catalog_default_sort_by":"position","category_url_suffix":".html","default_title":"Magento Commerce","default_keywords":"swift,icube","default_description":"this is demo swift site","default_display_currency_code":"USD","date_of_birth":null,"gender":null,"general_country_default":"ID","header_logo_src":"stores/1/icube_swift-07_copy3.png","head_shortcut_icon":"stores/1/faveicoswift.png","icube_pinlocation_gmap_key":"AIzaSyCsWgNT9vLJSzSBmJlqFdembBz4zBCLRgQ","icube_pinlocation_geocoding_key":null,"locale":"en_US","logo_alt":null,"logo_width":150,"logo_height":65,"shipments_configuration":"{\n                    \"sg-recommended by shipper\": \"shipperid_Recommended by Shipper\",\n                    \"sg-freeshipping\": \"freeshipping_freeshipping,freeshipping_null,pickup_pickup\",\n                    \"sg-express\": \"shipperid_Anteraja-Next Day,shipperid_JNE-CTCYES,shipperid_JNE-YES,shipperid_Lion Parcel-ONEPACK,shipperid_Ninja Xpress-Next Day,shipperid_RPX-NDP,shipperid_SAP-One Day Service,shipperid_SiCepat-BEST,shipperid_Tiki-ONS,logistix_JNE-YES,logistix_JNE-CTC,logistix_JNE-CTCYES,logistix_SICEPAT-BEST,logistix_ANTERAJA-NEXTDAY,popaket_JNE-SPS19,popaket_JNE-YES19,popaket_SiCepat-BEST,popaket_SAP Logistic-UDRONS,popaket_SAP Logistic-DRSDS,popaket_Wahana-DETUX,popaket_Tiki-ONSTIKI,popaket_Tiki-TDSTIKI,popaket_RPX-PSM,popaket_RPX-PSN,popaket_REX-REXEXPRESS,popaket_REX-REX-1,popaket_POS Indonesia-240,popaket_POS Indonesia-2Q9,popaket_POS Indonesia-447,popaket_Lion Parcel-DOCUMENT-ONEPACK,popaket_Lion Parcel-PACKAGE-ONEPACK,popaket_AlfaTrex-ODPOP,popaket_AlfaTrex-NDSALF,popaket_POPExpress-EXPPOP,popaket_AnterAja-NDAJA,popaket_Paxel-PAXELND\",\n                    \"sg-sameday\": \"gosend_sameday,grabexpress_same_day,grabexpress_null,gosend_null,shipperid_Anteraja-Same Day,shipperid_GO SEND-Same Day,shipperid_Grab Express-Same Day,logistix_GOSEND-SAMEDAY,logistix_GRAB-SAMEDAY,logistix_PAXEL-SAMEDAY,logistix_ANTERAJA-SAMEDAY,popaket_SiCepat-SDS,popaket_Tiki-SDSTIKI,popaket_RPX-PSS,popaket_AlfaTrex-SDSALF,popaket_Grab-SDSGRAB,popaket_AnterAja-SDAJA,popaket_AnterAja-SDSAJA,popaket_Paxel-PAXELSD,popaket_Go Send-SAMEDAYGOJEK,popaket_Borzo-same_day\",\n                    \"sg-instant\": \"gosend_instant,grabexpress_instant,shipperid_GO SEND-Instant,shipperid_Grab Express-Instant,logistix_GOSEND-INSTANT,logistix_GRAB-INSTANT,popaket_Lalamove-MOTORCYCLELALA,popaket_Lalamove-MPVLALA,popaket_Lalamove-TRUCK175LALA,popaket_Lalamove-VANLALA,popaket_Lalamove-SEDANLALA,popaket_Grab-BULKGRAB,popaket_Grab-INSGRAB,popaket_Go Send-INSTANTGOJEK,popaket_Deliveree-deetrontonbox,popaket_Deliveree-deetrontonwingbox,popaket_Deliveree-deefusoheavy,popaket_Deliveree-deefusolite,popaket_Deliveree-deedoubleengkelpickup,popaket_Deliveree-deeengkelbox,popaket_Deliveree-deeengkelpickup,popaket_Deliveree-deesmallpickup,popaket_Deliveree-deevan,popaket_Deliveree-deeeconomy,popaket_Borzo-standardbike,popaket_Borzo-standardvan,popaket_Borzo-standardcar,popaket_Borzo-standardsuv,popaket_Borzo-standardminivan\",\n                    \"sg-reguler\": \"advancerate_null,advancerate_advancedmatrix,flatrate_flatrate,tablerate_bestway,shipperid_Anteraja-Regular,shipperid_J&T-Express,shipperid_JNE-CTC,shipperid_JNE-OKE,shipperid_JNE-REG,shipperid_Lion Parcel-REGPACK,shipperid_Ninja Xpress-Standard,shipperid_RPX-RGP,shipperid_SAP-Reguler,shipperid_SiCepat-HALU,shipperid_SiCepat-REG,shipperid_Tiki-ECO,shipperid_Tiki-REG,shipperid_Wahana-Regular,logistix_JNE-CTC,logistix_JNE-REG,logistix_SICEPAT-REG,logistix_POS,logistix_JNT-EZ,logistix_ANTERAJA-REG,shipperid_null,popaket_null,popaket_JNE-OKE19,popaket_JNE-REG19,popaket_SiCepat-HALU,popaket_SiCepat-SIUNT,popaket_SiCepat-REG,popaket_SAP Logistic-UDRREG,popaket_Wahana-DTUK,popaket_Wahana-DENO,popaket_Tiki-REGTIKI,popaket_Tiki-ECOTIKI,popaket_RPX-PSR,popaket_Ninja Xpress-STD,popaket_REX-REX-10,popaket_REX-REXREGULAR,popaket_POS Indonesia-PVG,popaket_POS Indonesia-311,popaket_POS Indonesia-PJE,popaket_POS Indonesia-PJB,popaket_POS Indonesia-PDG,popaket_Lion Parcel-PACKAGE-LANDPACK,popaket_Lion Parcel-DOCUMENT-REGPACK,popaket_Lion Parcel-PACKAGE-REGPACK,popaket_AlfaTrex-ECSALF,popaket_AlfaTrex-RGSALF,popaket_PopExpress-REGPOP,popaket_AnterAja-REGAJA,popaket_J&T Express-EZ\",\n                    \"sg-trucking\": \"shipperid_Indah Cargo-Laut,shipperid_Dakota Cargo-Reguler,shipperid_Indah Cargo-Darat,shipperid_JNE-JTR,logistix_JNE-JTR,shipperid_SiCepat-GOKIL,logistix_SICEPAT-GOKIL,popaket_JNE-JTR18,popaket_JNE-JTR250,popaket_JNE-JTR<150,popaket_JNE-JTR>250, popaket_SiCepat-CARGO,popaket_SiCepat-GOKIL,popaket_SAP Logistic-DRGREG,popaket_Tiki-TRCTIKI,popaket_Tiki-T15TIKI,popaket_Tiki-T25TIKI,popaket_Tiki-T60TIKI,popaket_Indah Logistik-LAUT,popaket_Indah Logistik-DARAT,popaket_Indah Logistik-TRUCK,popaket_Indah Logistik-TOWING,popaket_Indah Logistik-CITY,popaket_Indah Logistik-UDARA,popaket_Sentral Cargo-DARAT-ELEKTRONIK,popaket_Sentral Cargo-DARATSENTRAL,popaket_Sentral Cargo-DARAT-NON ELEKTRONIK,popaket_Sentral Cargo-UDARA-ELEKTRONIK,popaket_Sentral Cargo-UDARA-NON ELEKTRONIK,popaket_Sentral Cargo-UDARASENTRAL\",\n                    \"sg-international\": \"shipperid_DPEX-EXPRESS PARCEL,shipperid_JNE-INTL,popaket_Wahana-SG00\"\n                    }\n                ","payments_configuration":"{\"pg-banktransfer\":\"snap_banktransfer,snap_banktransfer_bca,snap_banktransfer_bni,banktransfer,snap_banktransfer_permata\",\"pg-installment\":\"snap_mandiri_installment,snap_bca_installment,snap_bni_installment,snap_mandiri_installment_3,snap_mandiri_installment_6,snap_mandiri_installment_12,snap_bca_installment,snap_maybank_installment,snap_bni_installment_3,snap_bni_installment_6,snap_bni_installment_12,\",\"pg-creditcard\":\"snap_creditcardbin,snap_creditcard,travelokapay\",\"pg-internetpayment\":\"snap_cimbclicks,snap_bcaklikpay,snap_klikbca,snap_alfamart,snap_indomaret,snap_klikbca,snap_gopay,snap_bcaklikpay,ipay88_ovo\",\"pg-others\":\"checkmo,cashondelivery,snap_mandiri_bill_payment,xendit,cc,alfamart,bcava,bniva,briva,mandiriva,permatava,dana,dd_bri,indomaret,linkaja,ovo,cc_subscription,kredivo,qr_codes\"}","pwa":{"use_cms_page_enable":true,"use_cms_page_identifier":"pwa-homepage","banner_slider_enable":false,"banner_slider_title":null,"category_list_enable":false,"category_list_url_key":null,"category_list_image_size_desktop_height":null,"category_list_image_size_desktop_width":null,"category_list_image_size_mobile_height":null,"category_list_image_size_mobile_width":null,"features_product_enable":false,"features_product_url_key":null,"primary_color":null,"secondary_color":null,"background_color":null,"error_color":null,"warning_msg_color":null,"success_msg_color":null,"font_color":"#000000","default_font":"Montserrat","heading_font":"Montserrat","button_background_color":null,"button_background_hover_color":null,"button_disabled_text_color":null,"button_disabled_background_color":null,"button_text_color":null,"button_text_hover_color":null,"button_border_color":null,"button_border_hover_color":null,"link_color":null,"link_hover_color":null,"link_font_decoration":null,"link_font_hover_decoration":null,"add_to_cart_enable":true,"app_name":"Swift PWA","cms_contact_identifiers":"contact-us-info","cms_social_media_link_identifer":"pwa_socmed_links","configurable_options_enable":true,"custom_install_app_enable":true,"default_robot":"INDEX,FOLLOW","drawer_filter_on_desktop_enable":false,"enabler_footer_mobile":true,"enabler_sticky_header":true,"facebook_app_id":null,"facebook_meta_id_app_id":null,"facebook_meta_id_enable":false,"footer_version":"pwa_footer_v1","header_version":"v1","home_slider_desktop_height":"750","home_slider_desktop_width":"1800","home_slider_mobile_height":"750","home_slider_mobile_width":"960","icon_apple_touch":null,"image_category_height":"577","image_category_width":"960","image_product_height":"300","image_product_width":"240","thumbor_enable":true,"thumbor_https_http":false,"thumbor_url":"https://thumbor.sirclocdn.com/unsafe/widthxheight/filters:format(webp)/","install_message":"Get free app","label_enable":true,"label_new_enable":false,"label_sale_enable":false,"label_weltpixel_enable":true,"magezon_slider_desktop_height":"750","magezon_slider_desktop_width":"1800","magezon_slider_mobile_height":"750","magezon_slider_mobile_width":"960","mobile_navigation":"bottom_navigation","page_size":"10","paypal_debug":false,"paypal_enable":false,"paypal_merchant_id":"CXCQMWK6ZNELQ","popup_detail_image_enable":true,"promo_banner_lite_after_width":"350","promo_banner_lite_label_width":"350","promo_banner_lite_top_width":"1300","quick_view_enable":true,"rating_enable":false,"recaptcha_contact_enable":false,"recaptcha_enable":false,"recaptcha_login_enable":false,"recaptcha_register_enable":false,"recaptcha_server_key_dev":null,"recaptcha_server_key_local":null,"recaptcha_server_key_prod":null,"recaptcha_server_key_stage":null,"recaptcha_site_key_dev":null,"recaptcha_site_key_local":null,"recaptcha_site_key_prod":null,"recaptcha_site_key_stage":null,"remove_decimal_price_enable":true,"share_icon_email":false,"share_icon_facebook":true,"share_icon_line":false,"share_icon_linkedin":false,"share_icon_pinterest":true,"share_icon_telegram":false,"share_icon_twitter":true,"ves_menu_alias":"top-menu","ves_menu_enable":true},"store_name":"v1","welcome":"Default welcome msg!","timezone":"Asia/Jakarta","title_prefix":null,"title_suffix":null,"title_separator":"-","website_id":1,"weight_unit":"lbs","oauth_access_token_lifetime_customer":"1","pwa_checkout_debug_enable":"1","snap_client_key":"SB-Mid-client-1F64CqNZz3Nzvai2","allow_guest_checkout":true,"snap_is_production":"0","aw_blog_general_enabled":"1","pickup_store":true,"cookie_restriction":false,"login_phone_password":true,"forgot_password_phone":true,"global_promo":{"enable":true,"text_color":"#B05D5D","background_color":"#FFE8E8"},"weltpixel_newsletter_general_enable":"1","weltpixel_newsletter_general_version":"3","weltpixel_newsletter_general_overlay_color":"#000000","weltpixel_newsletter_general_overlay_opacity":"0.8","weltpixel_newsletter_general_display_mode":"1","weltpixel_newsletter_general_display_mobile":"1","weltpixel_newsletter_general_mobile_version":"3","weltpixel_newsletter_general_popup_cookie_lifetime":"4","weltpixel_newsletter_general_terms_conditions_consent":"1","weltpixel_newsletter_general_terms_conditions_text":"<a href=\"https://pearl.weltpixel.com/privacy-policy-cookie-restriction-mode\" target=\"_blank\">I agree to the Privacy Policy. </a>","weltpixel_newsletter_general_enable_trigger_button":"1","weltpixel_newsletter_general_trigger_button_title":"WANT A DISCOUNT?","weltpixel_newsletter_general_trigger_button_color":"#FFFFFF","weltpixel_newsletter_general_trigger_button_backgroundcolor":"#000000","aw_blog_general_comments_enabled":null,"aw_blog_general_disqus_forum_code":null,"aw_blog_related_products_block_layout":null,"aw_blog_related_products_block_position":"not_display","aw_blog_related_products_products_limit":8,"aw_blog_related_products_display_add_to_cart":null,"weltpixel_RecentlyViewedBar_general_enable":"0","weltpixel_thankyoupage_create_account_enable":true,"payment_travelokapay_public_key":"","payment_travelokapay_user_id":"621610c74c98b14ae3006a78","payment_travelokapay_bin_whitelist":null,"pin_location_latitude":-6.227599,"pin_location_longitude":106.8242503,"minimum_order_amount":null,"minimum_order_enable":null,"OmsRma":{"enable_oms_rma":true,"enable_oms_pwa_request_return":true,"oms_rma_link":"https://swiftoms-pwa.testingnow.me/requestreturn/request/request"},"oms_channel_code":"SWI"}}
+\ No newline at end of file
+diff --git a/core/api/rest/request/index.js b/core/api/rest/request/index.js
+index 2a1ee4bdf..dca942ac4 100644
+--- a/core/api/rest/request/index.js
++++ b/core/api/rest/request/index.js
+@@ -1,11 +1,11 @@
+ const { getAppEnv } = require('../../../helpers/env');
+ const { HOST } = require('../../../../swift.config');
+ 
+-function requestInternal() {
++function requestInternal(request) {
+     const appEnv = getAppEnv();
+     const url = HOST[appEnv] || HOST.prod;
+     return new Promise((resolve) => {
+-        fetch(`${url}/getConfig`)
++        fetch(`${url}/${request}`)
+             .then((response) => response.json())
+             .then((data) => resolve(data));
+     });
+diff --git a/core/modules/theme/pages/_app.js b/core/modules/theme/pages/_app.js
+index ba29b609d..3574a6d2a 100644
+--- a/core/modules/theme/pages/_app.js
++++ b/core/modules/theme/pages/_app.js
+@@ -140,7 +140,7 @@ class MyApp extends App {
+         }
+         if (typeof window === 'undefined' && (!storeConfig || typeof storeConfig.secure_base_media_url === 'undefined')) {
+             // storeConfig = await apolloClient.query({ query: ConfigSchema }).then(({ data }) => data.storeConfig);
+-            storeConfig = await requestInternal();
++            storeConfig = await requestInternal('getConfig');
+             frontendOptions = storeConfig;
+             // Handle redirecting to tomaintenance page automatically when GQL is in maintenance mode.
+             // We do this here since query storeConfig is the first query and be done in server side
+diff --git a/server.js b/server.js
+index ec3951f05..00abac1c3 100644
+--- a/server.js
++++ b/server.js
+@@ -23,6 +23,7 @@ const {
+     expiredToken, nossrCache, features, assetsVersion,
+ } = require('./swift.config');
+ const generateXml = require('./core/api/rest/xml');
++const generateConfig = require('./core/api/rest/config');
+ const getConfig = require('./core/api/rest/config');
+ const captchaValidation = require('./core/api/rest/captcha');
+ const firebaseValidation = require('./core/api/rest/firebase-cloud-messaging');
+@@ -173,6 +174,9 @@ async function renderAndCache(req, res) {
+         res.sendFile(path.join(__dirname, '/public/static/maintenance.html'));
+     });
+ 
++    // generate config from magento
++    server.get('/generate-config', generateConfig);
++
+     server.get('/sitemap.xml', generateXml);
+     server.post('/captcha-validation', captchaValidation);
+ 
+
+From 0bb1e1dea6a3071065b22bf725be093eb784e768 Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Tue, 6 Dec 2022 14:19:07 +0700
+Subject: [PATCH 04/18] fix([28923266] storeconfig - api):internal request
+ storeconfig
+
+---
+ cli/config/bin/index.js | 263 ----------------------------------------
+ cli/config/package.json |  21 ----
+ 2 files changed, 284 deletions(-)
+ delete mode 100644 cli/config/bin/index.js
+ delete mode 100644 cli/config/package.json
+
+diff --git a/cli/config/bin/index.js b/cli/config/bin/index.js
+deleted file mode 100644
+index 5cef75644..000000000
+--- a/cli/config/bin/index.js
++++ /dev/null
+@@ -1,263 +0,0 @@
+-#! /usr/bin/env node
+-const fs = require('fs');
+-const path = require('path');
+-const { GraphQLClient, gql } = require('graphql-request');
+-
+-const baseDir = path.join(__dirname, '../../../core/api/rest/config/');
+-
+-const graphQLClient = new GraphQLClient('https://b2cdemo.getswift.asia/graphql', {
+-    method: 'GET',
+-    jsonSerializer: {
+-        parse: JSON.parse,
+-        stringify: JSON.stringify,
+-    },
+-});
+-
+-const req = gql`{
+-    storeConfig {
+-      secure_base_media_url
+-      secure_base_static_url
+-      customer_password_minimum_password_length
+-      customer_password_required_character_classes_number
+-      base_media_url
+-      base_static_url
+-      base_url
+-      base_currency_code
+-      code
+-      catalog_search_engine
+-      copyright
+-      catalog_default_sort_by
+-      category_url_suffix
+-      default_title
+-      default_keywords
+-      default_description
+-      default_display_currency_code
+-      date_of_birth
+-      gender
+-      general_country_default
+-      header_logo_src
+-      head_shortcut_icon
+-      icube_pinlocation_gmap_key
+-      icube_pinlocation_geocoding_key
+-      locale
+-      logo_alt
+-      logo_width
+-      logo_height
+-      shipments_configuration
+-      payments_configuration
+-      pwa {
+-        use_cms_page_enable
+-        use_cms_page_identifier
+-        banner_slider_enable
+-        banner_slider_title
+-        category_list_enable
+-        category_list_url_key            
+-        category_list_image_size_desktop_height
+-        category_list_image_size_desktop_width
+-        category_list_image_size_mobile_height
+-        category_list_image_size_mobile_width
+-        features_product_enable
+-        features_product_url_key
+-        use_cms_page_enable
+-        use_cms_page_identifier
+-        banner_slider_enable
+-        banner_slider_title
+-        category_list_enable
+-        category_list_url_key            
+-        category_list_image_size_desktop_height
+-        category_list_image_size_desktop_width
+-        category_list_image_size_mobile_height
+-        category_list_image_size_mobile_width
+-        features_product_enable
+-        features_product_url_key
+-        primary_color
+-        secondary_color
+-        background_color
+-        error_color
+-        warning_msg_color
+-        success_msg_color
+-        font_color
+-        default_font
+-        heading_font
+-        button_background_color
+-        button_background_hover_color
+-        button_disabled_text_color
+-        button_disabled_background_color
+-        button_text_color
+-        button_text_hover_color
+-        button_disabled_text_color
+-        button_border_color
+-        button_border_hover_color
+-        link_color
+-        link_hover_color
+-        link_font_decoration
+-        link_font_hover_decoration
+-        add_to_cart_enable
+-        app_name
+-        cms_contact_identifiers
+-        cms_social_media_link_identifer
+-        configurable_options_enable
+-        custom_install_app_enable
+-        default_robot
+-        drawer_filter_on_desktop_enable
+-        enabler_footer_mobile
+-        enabler_sticky_header
+-        facebook_app_id
+-        facebook_meta_id_app_id
+-        facebook_meta_id_enable
+-        footer_version
+-        header_version
+-        home_slider_desktop_height
+-        home_slider_desktop_width
+-        home_slider_mobile_height
+-        home_slider_mobile_width
+-        icon_apple_touch
+-        image_category_height
+-        image_category_width
+-        image_product_height
+-        image_product_width
+-        thumbor_enable
+-        thumbor_https_http
+-        thumbor_url
+-        install_message
+-        label_enable
+-        label_new_enable
+-        label_sale_enable
+-        label_weltpixel_enable
+-        magezon_slider_desktop_height
+-        magezon_slider_desktop_width
+-        magezon_slider_mobile_height
+-        magezon_slider_mobile_width
+-        mobile_navigation
+-        page_size
+-        paypal_debug
+-        paypal_enable
+-        paypal_merchant_id
+-        popup_detail_image_enable
+-        promo_banner_lite_after_width
+-        promo_banner_lite_label_width
+-        promo_banner_lite_top_width
+-        quick_view_enable
+-        rating_enable
+-        recaptcha_contact_enable
+-        recaptcha_enable
+-        recaptcha_login_enable
+-        recaptcha_register_enable
+-        recaptcha_server_key_dev
+-        recaptcha_server_key_local
+-        recaptcha_server_key_prod
+-        recaptcha_server_key_stage
+-        recaptcha_site_key_dev
+-        recaptcha_site_key_local
+-        recaptcha_site_key_prod
+-        recaptcha_site_key_stage
+-        remove_decimal_price_enable
+-        share_icon_email
+-        share_icon_facebook
+-        share_icon_line
+-        share_icon_linkedin
+-        share_icon_pinterest
+-        share_icon_telegram
+-        share_icon_twitter
+-        ves_menu_alias
+-        ves_menu_enable
+-        ves_menu_enable
+-        primary_color
+-        secondary_color
+-        background_color
+-        error_color
+-        warning_msg_color
+-        success_msg_color
+-        font_color
+-        default_font
+-        heading_font
+-        button_background_color
+-        button_background_hover_color
+-        button_disabled_text_color
+-        button_disabled_background_color
+-        button_text_color
+-        button_text_hover_color
+-        button_disabled_text_color
+-        button_border_color
+-        button_border_hover_color
+-        link_color
+-        link_hover_color
+-        link_font_decoration
+-        link_font_hover_decoration
+-      }
+-      store_name
+-      welcome
+-      timezone
+-      title_prefix
+-      title_suffix
+-      title_separator
+-      website_id
+-      weight_unit
+-      oauth_access_token_lifetime_customer
+-      pwa_checkout_debug_enable
+-      snap_client_key
+-      allow_guest_checkout
+-      snap_is_production
+-      aw_blog_general_enabled
+-      pickup_store
+-      cookie_restriction
+-      login_phone_password
+-      forgot_password_phone
+-      global_promo {
+-        enable
+-        text_color
+-        background_color
+-      }
+-      weltpixel_newsletter_general_enable
+-      weltpixel_newsletter_general_version
+-      weltpixel_newsletter_general_overlay_color
+-      weltpixel_newsletter_general_overlay_opacity
+-      weltpixel_newsletter_general_display_mode
+-      weltpixel_newsletter_general_display_mobile
+-      weltpixel_newsletter_general_mobile_version
+-      weltpixel_newsletter_general_popup_cookie_lifetime
+-      weltpixel_newsletter_general_terms_conditions_consent
+-      weltpixel_newsletter_general_terms_conditions_text
+-      weltpixel_newsletter_general_enable_trigger_button
+-      weltpixel_newsletter_general_trigger_button_title
+-      weltpixel_newsletter_general_trigger_button_color
+-      weltpixel_newsletter_general_trigger_button_backgroundcolor
+-      aw_blog_general_comments_enabled
+-      aw_blog_general_disqus_forum_code
+-      aw_blog_related_products_block_layout
+-      aw_blog_related_products_block_position
+-      aw_blog_related_products_products_limit
+-      aw_blog_related_products_display_add_to_cart
+-      weltpixel_RecentlyViewedBar_general_enable
+-      weltpixel_thankyoupage_create_account_enable
+-      payment_travelokapay_public_key
+-      payment_travelokapay_user_id
+-      payment_travelokapay_bin_whitelist
+-      pin_location_latitude
+-      pin_location_longitude
+-      minimum_order_amount
+-      minimum_order_enable
+-      OmsRma{
+-        enable_oms_rma
+-        enable_oms_pwa_request_return
+-        oms_rma_link
+-      }
+-      oms_channel_code
+-    }
+-  }  `;
+-graphQLClient.request(req, {}).then((data) => {
+-    console.log('Success');
+-    console.log(data);
+-    fs.writeFile(`${baseDir}config2.json`, JSON.stringify(data), (err) => {
+-        if (err) throw err;
+-    });
+-}).catch((err) => console.log(err));
+-
+-// fs.readFile(`${baseDir}/config.json`, "utf8", (err, jsonString) => {
+-// if (err) {
+-//     console.log(baseDir)
+-//     console.log("File read failed:", err);
+-//     return;
+-// }
+-// console.log(JSON.parse(jsonString));
+-// });
+diff --git a/cli/config/package.json b/cli/config/package.json
+deleted file mode 100644
+index b3dd702e0..000000000
+--- a/cli/config/package.json
++++ /dev/null
+@@ -1,21 +0,0 @@
+-{
+-  "name": "st-cli-example",
+-  "version": "0.0.1",
+-  "description": "An example showing a simple CLI tool for working with SmartThings-connected devices.",
+-  "main": "bin/cli.js",
+-  "scripts": {
+-    "generate": "node bin/index.js",
+-    "test": "echo \"Error: no test specified\" && exit 1"
+-  },
+-  "author": "SmartThings",
+-  "license": "Apache-2.0",
+-  "dependencies": {
+-    "commander": "^2.11.0",
+-    "prettyjson": "^1.2.1",
+-    "request": "^2.83.0",
+-    "request-promise": "^4.2.2"
+-  },
+-  "bin": {
+-    "sthelper": "./bin/cli.js"
+-  }
+-}
+\ No newline at end of file
+
+From 714b4de78ded1c3f0a367985f80fac7848df7656 Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Tue, 6 Dec 2022 15:10:23 +0700
+Subject: [PATCH 05/18] fix([28923266] storeconfig - json):delete and ignore
+ file config.json
+
+---
+ .gitignore                        |   4 +
+ core/api/rest/config/config.json  | 196 ------------------------------
+ core/api/rest/config/config2.json |   1 -
+ 3 files changed, 4 insertions(+), 197 deletions(-)
+ delete mode 100644 core/api/rest/config/config.json
+ delete mode 100644 core/api/rest/config/config2.json
+
+diff --git a/.gitignore b/.gitignore
+index 95697de00..f8fb6bddb 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -32,3 +32,7 @@ package-lock.json
+ /public/static/firebase-messaging-sw.js
+ /public/static/install.js
+ /public/static/firebase/*
++
++#storeconfig
++/core/api/rest/config/config.json
++/core/api/rest/config/config2.json
+\ No newline at end of file
+diff --git a/core/api/rest/config/config.json b/core/api/rest/config/config.json
+deleted file mode 100644
+index 4bc4f91cf..000000000
+--- a/core/api/rest/config/config.json
++++ /dev/null
+@@ -1,196 +0,0 @@
+-{
+-    "storeConfig": {
+-      "secure_base_media_url": "https://b2cdemo.getswift.asia/media/",
+-      "secure_base_static_url": "https://b2cdemo.getswift.asia/static/version1667899076/",
+-      "customer_password_minimum_password_length": 8,
+-      "customer_password_required_character_classes_number": 3,
+-      "base_media_url": "https://b2cdemo.getswift.asia/media/",
+-      "base_static_url": "https://b2cdemo.getswift.asia/static/version1667899076/",
+-      "base_url": "https://b2cdemo.getswift.asia/",
+-      "base_currency_code": "IDR",
+-      "code": "v1",
+-      "catalog_search_engine": "elasticsuite",
+-      "copyright": "Copyright © 2013-present Magento, Inc. All rights reserved.",
+-      "catalog_default_sort_by": "position",
+-      "category_url_suffix": ".html",
+-      "default_title": "Magento Commerce",
+-      "default_keywords": "swift,icube",
+-      "default_description": "this is demo swift site",
+-      "default_display_currency_code": "IDR",
+-      "date_of_birth": null,
+-      "gender": null,
+-      "general_country_default": "ID",
+-      "header_logo_src": "stores/1/icube_swift-07_copy3.png",
+-      "head_shortcut_icon": "stores/1/faveicoswift.png",
+-      "icube_pinlocation_gmap_key": "AIzaSyCsWgNT9vLJSzSBmJlqFdembBz4zBCLRgQ",
+-      "icube_pinlocation_geocoding_key": null,
+-      "locale": "en_US",
+-      "logo_alt": null,
+-      "logo_width": 150,
+-      "logo_height": 65,
+-      "shipments_configuration": "{\n                    \"sg-recommended by shipper\": \"shipperid_Recommended by Shipper\",\n                    \"sg-freeshipping\": \"freeshipping_freeshipping,freeshipping_null,pickup_pickup\",\n                    \"sg-express\": \"shipperid_Anteraja-Next Day,shipperid_JNE-CTCYES,shipperid_JNE-YES,shipperid_Lion Parcel-ONEPACK,shipperid_Ninja Xpress-Next Day,shipperid_RPX-NDP,shipperid_SAP-One Day Service,shipperid_SiCepat-BEST,shipperid_Tiki-ONS,logistix_JNE-YES,logistix_JNE-CTC,logistix_JNE-CTCYES,logistix_SICEPAT-BEST,logistix_ANTERAJA-NEXTDAY,popaket_JNE-SPS19,popaket_JNE-YES19,popaket_SiCepat-BEST,popaket_SAP Logistic-UDRONS,popaket_SAP Logistic-DRSDS,popaket_Wahana-DETUX,popaket_Tiki-ONSTIKI,popaket_Tiki-TDSTIKI,popaket_RPX-PSM,popaket_RPX-PSN,popaket_REX-REXEXPRESS,popaket_REX-REX-1,popaket_POS Indonesia-240,popaket_POS Indonesia-2Q9,popaket_POS Indonesia-447,popaket_Lion Parcel-DOCUMENT-ONEPACK,popaket_Lion Parcel-PACKAGE-ONEPACK,popaket_AlfaTrex-ODPOP,popaket_AlfaTrex-NDSALF,popaket_POPExpress-EXPPOP,popaket_AnterAja-NDAJA,popaket_Paxel-PAXELND\",\n                    \"sg-sameday\": \"gosend_sameday,grabexpress_same_day,grabexpress_null,gosend_null,shipperid_Anteraja-Same Day,shipperid_GO SEND-Same Day,shipperid_Grab Express-Same Day,logistix_GOSEND-SAMEDAY,logistix_GRAB-SAMEDAY,logistix_PAXEL-SAMEDAY,logistix_ANTERAJA-SAMEDAY,popaket_SiCepat-SDS,popaket_Tiki-SDSTIKI,popaket_RPX-PSS,popaket_AlfaTrex-SDSALF,popaket_Grab-SDSGRAB,popaket_AnterAja-SDAJA,popaket_AnterAja-SDSAJA,popaket_Paxel-PAXELSD,popaket_Go Send-SAMEDAYGOJEK,popaket_Borzo-same_day\",\n                    \"sg-instant\": \"gosend_instant,grabexpress_instant,shipperid_GO SEND-Instant,shipperid_Grab Express-Instant,logistix_GOSEND-INSTANT,logistix_GRAB-INSTANT,popaket_Lalamove-MOTORCYCLELALA,popaket_Lalamove-MPVLALA,popaket_Lalamove-TRUCK175LALA,popaket_Lalamove-VANLALA,popaket_Lalamove-SEDANLALA,popaket_Grab-BULKGRAB,popaket_Grab-INSGRAB,popaket_Go Send-INSTANTGOJEK,popaket_Deliveree-deetrontonbox,popaket_Deliveree-deetrontonwingbox,popaket_Deliveree-deefusoheavy,popaket_Deliveree-deefusolite,popaket_Deliveree-deedoubleengkelpickup,popaket_Deliveree-deeengkelbox,popaket_Deliveree-deeengkelpickup,popaket_Deliveree-deesmallpickup,popaket_Deliveree-deevan,popaket_Deliveree-deeeconomy,popaket_Borzo-standardbike,popaket_Borzo-standardvan,popaket_Borzo-standardcar,popaket_Borzo-standardsuv,popaket_Borzo-standardminivan\",\n                    \"sg-reguler\": \"advancerate_null,advancerate_advancedmatrix,flatrate_flatrate,tablerate_bestway,shipperid_Anteraja-Regular,shipperid_J&T-Express,shipperid_JNE-CTC,shipperid_JNE-OKE,shipperid_JNE-REG,shipperid_Lion Parcel-REGPACK,shipperid_Ninja Xpress-Standard,shipperid_RPX-RGP,shipperid_SAP-Reguler,shipperid_SiCepat-HALU,shipperid_SiCepat-REG,shipperid_Tiki-ECO,shipperid_Tiki-REG,shipperid_Wahana-Regular,logistix_JNE-CTC,logistix_JNE-REG,logistix_SICEPAT-REG,logistix_POS,logistix_JNT-EZ,logistix_ANTERAJA-REG,shipperid_null,popaket_null,popaket_JNE-OKE19,popaket_JNE-REG19,popaket_SiCepat-HALU,popaket_SiCepat-SIUNT,popaket_SiCepat-REG,popaket_SAP Logistic-UDRREG,popaket_Wahana-DTUK,popaket_Wahana-DENO,popaket_Tiki-REGTIKI,popaket_Tiki-ECOTIKI,popaket_RPX-PSR,popaket_Ninja Xpress-STD,popaket_REX-REX-10,popaket_REX-REXREGULAR,popaket_POS Indonesia-PVG,popaket_POS Indonesia-311,popaket_POS Indonesia-PJE,popaket_POS Indonesia-PJB,popaket_POS Indonesia-PDG,popaket_Lion Parcel-PACKAGE-LANDPACK,popaket_Lion Parcel-DOCUMENT-REGPACK,popaket_Lion Parcel-PACKAGE-REGPACK,popaket_AlfaTrex-ECSALF,popaket_AlfaTrex-RGSALF,popaket_PopExpress-REGPOP,popaket_AnterAja-REGAJA,popaket_J&T Express-EZ\",\n                    \"sg-trucking\": \"shipperid_Indah Cargo-Laut,shipperid_Dakota Cargo-Reguler,shipperid_Indah Cargo-Darat,shipperid_JNE-JTR,logistix_JNE-JTR,shipperid_SiCepat-GOKIL,logistix_SICEPAT-GOKIL,popaket_JNE-JTR18,popaket_JNE-JTR250,popaket_JNE-JTR<150,popaket_JNE-JTR>250, popaket_SiCepat-CARGO,popaket_SiCepat-GOKIL,popaket_SAP Logistic-DRGREG,popaket_Tiki-TRCTIKI,popaket_Tiki-T15TIKI,popaket_Tiki-T25TIKI,popaket_Tiki-T60TIKI,popaket_Indah Logistik-LAUT,popaket_Indah Logistik-DARAT,popaket_Indah Logistik-TRUCK,popaket_Indah Logistik-TOWING,popaket_Indah Logistik-CITY,popaket_Indah Logistik-UDARA,popaket_Sentral Cargo-DARAT-ELEKTRONIK,popaket_Sentral Cargo-DARATSENTRAL,popaket_Sentral Cargo-DARAT-NON ELEKTRONIK,popaket_Sentral Cargo-UDARA-ELEKTRONIK,popaket_Sentral Cargo-UDARA-NON ELEKTRONIK,popaket_Sentral Cargo-UDARASENTRAL\",\n                    \"sg-international\": \"shipperid_DPEX-EXPRESS PARCEL,shipperid_JNE-INTL,popaket_Wahana-SG00\"\n                    }\n                ",
+-      "payments_configuration": "{\"pg-banktransfer\":\"snap_banktransfer,snap_banktransfer_bca,snap_banktransfer_bni,banktransfer,snap_banktransfer_permata\",\"pg-installment\":\"snap_mandiri_installment,snap_bca_installment,snap_bni_installment,snap_mandiri_installment_3,snap_mandiri_installment_6,snap_mandiri_installment_12,snap_bca_installment,snap_maybank_installment,snap_bni_installment_3,snap_bni_installment_6,snap_bni_installment_12,\",\"pg-creditcard\":\"snap_creditcardbin,snap_creditcard,travelokapay\",\"pg-internetpayment\":\"snap_cimbclicks,snap_bcaklikpay,snap_klikbca,snap_alfamart,snap_indomaret,snap_klikbca,snap_gopay,snap_bcaklikpay,ipay88_ovo\",\"pg-others\":\"checkmo,cashondelivery,snap_mandiri_bill_payment,xendit,cc,alfamart,bcava,bniva,briva,mandiriva,permatava,dana,dd_bri,indomaret,linkaja,ovo,cc_subscription,kredivo,qr_codes\"}",
+-      "pwa": {
+-        "use_cms_page_enable": true,
+-        "use_cms_page_identifier": "pwa-homepage",
+-        "banner_slider_enable": false,
+-        "banner_slider_title": null,
+-        "category_list_enable": false,
+-        "category_list_url_key": null,
+-        "category_list_image_size_desktop_height": null,
+-        "category_list_image_size_desktop_width": null,
+-        "category_list_image_size_mobile_height": null,
+-        "category_list_image_size_mobile_width": null,
+-        "features_product_enable": false,
+-        "features_product_url_key": null,
+-        "primary_color": null,
+-        "secondary_color": null,
+-        "background_color": null,
+-        "error_color": null,
+-        "warning_msg_color": null,
+-        "success_msg_color": null,
+-        "font_color": null,
+-        "default_font": "0",
+-        "heading_font": "0",
+-        "button_background_color": null,
+-        "button_background_hover_color": null,
+-        "button_disabled_text_color": null,
+-        "button_disabled_background_color": null,
+-        "button_text_color": null,
+-        "button_text_hover_color": null,
+-        "button_border_color": null,
+-        "button_border_hover_color": null,
+-        "link_color": null,
+-        "link_hover_color": null,
+-        "link_font_decoration": null,
+-        "link_font_hover_decoration": null,
+-        "add_to_cart_enable": false,
+-        "app_name": "Swift PWA",
+-        "cms_contact_identifiers": "contact-us-info",
+-        "cms_social_media_link_identifer": "pwa_socmed_links",
+-        "configurable_options_enable": false,
+-        "custom_install_app_enable": true,
+-        "default_robot": "INDEX,FOLLOW",
+-        "drawer_filter_on_desktop_enable": false,
+-        "enabler_footer_mobile": true,
+-        "enabler_sticky_header": true,
+-        "facebook_app_id": null,
+-        "facebook_meta_id_app_id": null,
+-        "facebook_meta_id_enable": false,
+-        "footer_version": "pwa_footer_v1",
+-        "header_version": "v1",
+-        "home_slider_desktop_height": "750",
+-        "home_slider_desktop_width": "1800",
+-        "home_slider_mobile_height": "750",
+-        "home_slider_mobile_width": "960",
+-        "icon_apple_touch": null,
+-        "image_category_height": "577",
+-        "image_category_width": "960",
+-        "image_product_height": "300",
+-        "image_product_width": "240",
+-        "thumbor_enable": true,
+-        "thumbor_https_http": false,
+-        "thumbor_url": "https://thumbor.sirclocdn.com/unsafe/widthxheight/filters:format(webp)/",
+-        "install_message": "Get free app",
+-        "label_enable": true,
+-        "label_new_enable": false,
+-        "label_sale_enable": false,
+-        "label_weltpixel_enable": true,
+-        "magezon_slider_desktop_height": "750",
+-        "magezon_slider_desktop_width": "1800",
+-        "magezon_slider_mobile_height": "750",
+-        "magezon_slider_mobile_width": "960",
+-        "mobile_navigation": "bottom_navigation",
+-        "page_size": "10",
+-        "paypal_debug": false,
+-        "paypal_enable": false,
+-        "paypal_merchant_id": "CXCQMWK6ZNELQ",
+-        "popup_detail_image_enable": true,
+-        "promo_banner_lite_after_width": "350",
+-        "promo_banner_lite_label_width": "350",
+-        "promo_banner_lite_top_width": "1300",
+-        "quick_view_enable": true,
+-        "rating_enable": false,
+-        "recaptcha_contact_enable": false,
+-        "recaptcha_enable": false,
+-        "recaptcha_login_enable": false,
+-        "recaptcha_register_enable": false,
+-        "recaptcha_server_key_dev": null,
+-        "recaptcha_server_key_local": null,
+-        "recaptcha_server_key_prod": null,
+-        "recaptcha_server_key_stage": null,
+-        "recaptcha_site_key_dev": null,
+-        "recaptcha_site_key_local": null,
+-        "recaptcha_site_key_prod": null,
+-        "recaptcha_site_key_stage": null,
+-        "remove_decimal_price_enable": true,
+-        "share_icon_email": false,
+-        "share_icon_facebook": true,
+-        "share_icon_line": false,
+-        "share_icon_linkedin": false,
+-        "share_icon_pinterest": true,
+-        "share_icon_telegram": false,
+-        "share_icon_twitter": true,
+-        "ves_menu_alias": "top-menu",
+-        "ves_menu_enable": true
+-      },
+-      "store_name": "v1",
+-      "welcome": "Default welcome msg!",
+-      "timezone": "Asia/Jakarta",
+-      "title_prefix": null,
+-      "title_suffix": null,
+-      "title_separator": "-",
+-      "website_id": 1,
+-      "weight_unit": "lbs",
+-      "oauth_access_token_lifetime_customer": "1",
+-      "pwa_checkout_debug_enable": null,
+-      "snap_client_key": "SB-Mid-client-hxJtckX_vnT7odR0",
+-      "allow_guest_checkout": true,
+-      "snap_is_production": "0",
+-      "aw_blog_general_enabled": "1",
+-      "pickup_store": true,
+-      "cookie_restriction": false,
+-      "login_phone_password": null,
+-      "forgot_password_phone": null,
+-      "global_promo": {
+-        "enable": false,
+-        "text_color": "#B05D5D",
+-        "background_color": "#FFE8E8"
+-      },
+-      "weltpixel_newsletter_general_enable": "1",
+-      "weltpixel_newsletter_general_version": "3",
+-      "weltpixel_newsletter_general_overlay_color": "#000000",
+-      "weltpixel_newsletter_general_overlay_opacity": "0.8",
+-      "weltpixel_newsletter_general_display_mode": "1",
+-      "weltpixel_newsletter_general_display_mobile": "1",
+-      "weltpixel_newsletter_general_mobile_version": "3",
+-      "weltpixel_newsletter_general_popup_cookie_lifetime": "4",
+-      "weltpixel_newsletter_general_terms_conditions_consent": "1",
+-      "weltpixel_newsletter_general_terms_conditions_text": "<a href=\"https://pearl.weltpixel.com/privacy-policy-cookie-restriction-mode\" target=\"_blank\">I agree to the Privacy Policy. </a>",
+-      "weltpixel_newsletter_general_enable_trigger_button": "1",
+-      "weltpixel_newsletter_general_trigger_button_title": "WANT A DISCOUNT?",
+-      "weltpixel_newsletter_general_trigger_button_color": "#FFFFFF",
+-      "weltpixel_newsletter_general_trigger_button_backgroundcolor": "#000000",
+-      "aw_blog_general_comments_enabled": null,
+-      "aw_blog_general_disqus_forum_code": null,
+-      "aw_blog_related_products_block_layout": null,
+-      "aw_blog_related_products_block_position": "not_display",
+-      "aw_blog_related_products_products_limit": 8,
+-      "aw_blog_related_products_display_add_to_cart": null,
+-      "weltpixel_RecentlyViewedBar_general_enable": "0",
+-      "weltpixel_thankyoupage_create_account_enable": true,
+-      "payment_travelokapay_public_key": "xnd_public_development_uxS0yhNGTVT4BDaDWRuy0pjmB5YMWxvHhFf6qLAO6x5jSzVSQQplMi8AyBy",
+-      "payment_travelokapay_user_id": "621610c74c98b14ae3006a78",
+-      "payment_travelokapay_bin_whitelist": null,
+-      "pin_location_latitude": -6.227599,
+-      "pin_location_longitude": 106.8242503,
+-      "minimum_order_amount": null,
+-      "minimum_order_enable": null,
+-      "OmsRma": {
+-        "enable_oms_rma": null,
+-        "enable_oms_pwa_request_return": false,
+-        "oms_rma_link": "https://b2cdemo.getswift.asia/aw_rma/customer/"
+-      },
+-      "oms_channel_code": "SWI"
+-    }
+-  }
+\ No newline at end of file
+diff --git a/core/api/rest/config/config2.json b/core/api/rest/config/config2.json
+deleted file mode 100644
+index 96defa293..000000000
+--- a/core/api/rest/config/config2.json
++++ /dev/null
+@@ -1 +0,0 @@
+-{"storeConfig":{"secure_base_media_url":"https://swift.testingnow.me/media/","secure_base_static_url":"https://swift.testingnow.me/static/","customer_password_minimum_password_length":8,"customer_password_required_character_classes_number":3,"base_media_url":"https://swift.testingnow.me/media/","base_static_url":"https://swift.testingnow.me/static/","base_url":"https://swift.testingnow.me/","base_currency_code":"USD","code":"v1","catalog_search_engine":"elasticsuite","copyright":"Copyright © 2013-present Magento, Inc. All rights reserved.","catalog_default_sort_by":"position","category_url_suffix":".html","default_title":"Magento Commerce","default_keywords":"swift,icube","default_description":"this is demo swift site","default_display_currency_code":"USD","date_of_birth":null,"gender":null,"general_country_default":"ID","header_logo_src":"stores/1/icube_swift-07_copy3.png","head_shortcut_icon":"stores/1/faveicoswift.png","icube_pinlocation_gmap_key":"AIzaSyCsWgNT9vLJSzSBmJlqFdembBz4zBCLRgQ","icube_pinlocation_geocoding_key":null,"locale":"en_US","logo_alt":null,"logo_width":150,"logo_height":65,"shipments_configuration":"{\n                    \"sg-recommended by shipper\": \"shipperid_Recommended by Shipper\",\n                    \"sg-freeshipping\": \"freeshipping_freeshipping,freeshipping_null,pickup_pickup\",\n                    \"sg-express\": \"shipperid_Anteraja-Next Day,shipperid_JNE-CTCYES,shipperid_JNE-YES,shipperid_Lion Parcel-ONEPACK,shipperid_Ninja Xpress-Next Day,shipperid_RPX-NDP,shipperid_SAP-One Day Service,shipperid_SiCepat-BEST,shipperid_Tiki-ONS,logistix_JNE-YES,logistix_JNE-CTC,logistix_JNE-CTCYES,logistix_SICEPAT-BEST,logistix_ANTERAJA-NEXTDAY,popaket_JNE-SPS19,popaket_JNE-YES19,popaket_SiCepat-BEST,popaket_SAP Logistic-UDRONS,popaket_SAP Logistic-DRSDS,popaket_Wahana-DETUX,popaket_Tiki-ONSTIKI,popaket_Tiki-TDSTIKI,popaket_RPX-PSM,popaket_RPX-PSN,popaket_REX-REXEXPRESS,popaket_REX-REX-1,popaket_POS Indonesia-240,popaket_POS Indonesia-2Q9,popaket_POS Indonesia-447,popaket_Lion Parcel-DOCUMENT-ONEPACK,popaket_Lion Parcel-PACKAGE-ONEPACK,popaket_AlfaTrex-ODPOP,popaket_AlfaTrex-NDSALF,popaket_POPExpress-EXPPOP,popaket_AnterAja-NDAJA,popaket_Paxel-PAXELND\",\n                    \"sg-sameday\": \"gosend_sameday,grabexpress_same_day,grabexpress_null,gosend_null,shipperid_Anteraja-Same Day,shipperid_GO SEND-Same Day,shipperid_Grab Express-Same Day,logistix_GOSEND-SAMEDAY,logistix_GRAB-SAMEDAY,logistix_PAXEL-SAMEDAY,logistix_ANTERAJA-SAMEDAY,popaket_SiCepat-SDS,popaket_Tiki-SDSTIKI,popaket_RPX-PSS,popaket_AlfaTrex-SDSALF,popaket_Grab-SDSGRAB,popaket_AnterAja-SDAJA,popaket_AnterAja-SDSAJA,popaket_Paxel-PAXELSD,popaket_Go Send-SAMEDAYGOJEK,popaket_Borzo-same_day\",\n                    \"sg-instant\": \"gosend_instant,grabexpress_instant,shipperid_GO SEND-Instant,shipperid_Grab Express-Instant,logistix_GOSEND-INSTANT,logistix_GRAB-INSTANT,popaket_Lalamove-MOTORCYCLELALA,popaket_Lalamove-MPVLALA,popaket_Lalamove-TRUCK175LALA,popaket_Lalamove-VANLALA,popaket_Lalamove-SEDANLALA,popaket_Grab-BULKGRAB,popaket_Grab-INSGRAB,popaket_Go Send-INSTANTGOJEK,popaket_Deliveree-deetrontonbox,popaket_Deliveree-deetrontonwingbox,popaket_Deliveree-deefusoheavy,popaket_Deliveree-deefusolite,popaket_Deliveree-deedoubleengkelpickup,popaket_Deliveree-deeengkelbox,popaket_Deliveree-deeengkelpickup,popaket_Deliveree-deesmallpickup,popaket_Deliveree-deevan,popaket_Deliveree-deeeconomy,popaket_Borzo-standardbike,popaket_Borzo-standardvan,popaket_Borzo-standardcar,popaket_Borzo-standardsuv,popaket_Borzo-standardminivan\",\n                    \"sg-reguler\": \"advancerate_null,advancerate_advancedmatrix,flatrate_flatrate,tablerate_bestway,shipperid_Anteraja-Regular,shipperid_J&T-Express,shipperid_JNE-CTC,shipperid_JNE-OKE,shipperid_JNE-REG,shipperid_Lion Parcel-REGPACK,shipperid_Ninja Xpress-Standard,shipperid_RPX-RGP,shipperid_SAP-Reguler,shipperid_SiCepat-HALU,shipperid_SiCepat-REG,shipperid_Tiki-ECO,shipperid_Tiki-REG,shipperid_Wahana-Regular,logistix_JNE-CTC,logistix_JNE-REG,logistix_SICEPAT-REG,logistix_POS,logistix_JNT-EZ,logistix_ANTERAJA-REG,shipperid_null,popaket_null,popaket_JNE-OKE19,popaket_JNE-REG19,popaket_SiCepat-HALU,popaket_SiCepat-SIUNT,popaket_SiCepat-REG,popaket_SAP Logistic-UDRREG,popaket_Wahana-DTUK,popaket_Wahana-DENO,popaket_Tiki-REGTIKI,popaket_Tiki-ECOTIKI,popaket_RPX-PSR,popaket_Ninja Xpress-STD,popaket_REX-REX-10,popaket_REX-REXREGULAR,popaket_POS Indonesia-PVG,popaket_POS Indonesia-311,popaket_POS Indonesia-PJE,popaket_POS Indonesia-PJB,popaket_POS Indonesia-PDG,popaket_Lion Parcel-PACKAGE-LANDPACK,popaket_Lion Parcel-DOCUMENT-REGPACK,popaket_Lion Parcel-PACKAGE-REGPACK,popaket_AlfaTrex-ECSALF,popaket_AlfaTrex-RGSALF,popaket_PopExpress-REGPOP,popaket_AnterAja-REGAJA,popaket_J&T Express-EZ\",\n                    \"sg-trucking\": \"shipperid_Indah Cargo-Laut,shipperid_Dakota Cargo-Reguler,shipperid_Indah Cargo-Darat,shipperid_JNE-JTR,logistix_JNE-JTR,shipperid_SiCepat-GOKIL,logistix_SICEPAT-GOKIL,popaket_JNE-JTR18,popaket_JNE-JTR250,popaket_JNE-JTR<150,popaket_JNE-JTR>250, popaket_SiCepat-CARGO,popaket_SiCepat-GOKIL,popaket_SAP Logistic-DRGREG,popaket_Tiki-TRCTIKI,popaket_Tiki-T15TIKI,popaket_Tiki-T25TIKI,popaket_Tiki-T60TIKI,popaket_Indah Logistik-LAUT,popaket_Indah Logistik-DARAT,popaket_Indah Logistik-TRUCK,popaket_Indah Logistik-TOWING,popaket_Indah Logistik-CITY,popaket_Indah Logistik-UDARA,popaket_Sentral Cargo-DARAT-ELEKTRONIK,popaket_Sentral Cargo-DARATSENTRAL,popaket_Sentral Cargo-DARAT-NON ELEKTRONIK,popaket_Sentral Cargo-UDARA-ELEKTRONIK,popaket_Sentral Cargo-UDARA-NON ELEKTRONIK,popaket_Sentral Cargo-UDARASENTRAL\",\n                    \"sg-international\": \"shipperid_DPEX-EXPRESS PARCEL,shipperid_JNE-INTL,popaket_Wahana-SG00\"\n                    }\n                ","payments_configuration":"{\"pg-banktransfer\":\"snap_banktransfer,snap_banktransfer_bca,snap_banktransfer_bni,banktransfer,snap_banktransfer_permata\",\"pg-installment\":\"snap_mandiri_installment,snap_bca_installment,snap_bni_installment,snap_mandiri_installment_3,snap_mandiri_installment_6,snap_mandiri_installment_12,snap_bca_installment,snap_maybank_installment,snap_bni_installment_3,snap_bni_installment_6,snap_bni_installment_12,\",\"pg-creditcard\":\"snap_creditcardbin,snap_creditcard,travelokapay\",\"pg-internetpayment\":\"snap_cimbclicks,snap_bcaklikpay,snap_klikbca,snap_alfamart,snap_indomaret,snap_klikbca,snap_gopay,snap_bcaklikpay,ipay88_ovo\",\"pg-others\":\"checkmo,cashondelivery,snap_mandiri_bill_payment,xendit,cc,alfamart,bcava,bniva,briva,mandiriva,permatava,dana,dd_bri,indomaret,linkaja,ovo,cc_subscription,kredivo,qr_codes\"}","pwa":{"use_cms_page_enable":true,"use_cms_page_identifier":"pwa-homepage","banner_slider_enable":false,"banner_slider_title":null,"category_list_enable":false,"category_list_url_key":null,"category_list_image_size_desktop_height":null,"category_list_image_size_desktop_width":null,"category_list_image_size_mobile_height":null,"category_list_image_size_mobile_width":null,"features_product_enable":false,"features_product_url_key":null,"primary_color":null,"secondary_color":null,"background_color":null,"error_color":null,"warning_msg_color":null,"success_msg_color":null,"font_color":"#000000","default_font":"Montserrat","heading_font":"Montserrat","button_background_color":null,"button_background_hover_color":null,"button_disabled_text_color":null,"button_disabled_background_color":null,"button_text_color":null,"button_text_hover_color":null,"button_border_color":null,"button_border_hover_color":null,"link_color":null,"link_hover_color":null,"link_font_decoration":null,"link_font_hover_decoration":null,"add_to_cart_enable":true,"app_name":"Swift PWA","cms_contact_identifiers":"contact-us-info","cms_social_media_link_identifer":"pwa_socmed_links","configurable_options_enable":true,"custom_install_app_enable":true,"default_robot":"INDEX,FOLLOW","drawer_filter_on_desktop_enable":false,"enabler_footer_mobile":true,"enabler_sticky_header":true,"facebook_app_id":null,"facebook_meta_id_app_id":null,"facebook_meta_id_enable":false,"footer_version":"pwa_footer_v1","header_version":"v1","home_slider_desktop_height":"750","home_slider_desktop_width":"1800","home_slider_mobile_height":"750","home_slider_mobile_width":"960","icon_apple_touch":null,"image_category_height":"577","image_category_width":"960","image_product_height":"300","image_product_width":"240","thumbor_enable":true,"thumbor_https_http":false,"thumbor_url":"https://thumbor.sirclocdn.com/unsafe/widthxheight/filters:format(webp)/","install_message":"Get free app","label_enable":true,"label_new_enable":false,"label_sale_enable":false,"label_weltpixel_enable":true,"magezon_slider_desktop_height":"750","magezon_slider_desktop_width":"1800","magezon_slider_mobile_height":"750","magezon_slider_mobile_width":"960","mobile_navigation":"bottom_navigation","page_size":"10","paypal_debug":false,"paypal_enable":false,"paypal_merchant_id":"CXCQMWK6ZNELQ","popup_detail_image_enable":true,"promo_banner_lite_after_width":"350","promo_banner_lite_label_width":"350","promo_banner_lite_top_width":"1300","quick_view_enable":true,"rating_enable":false,"recaptcha_contact_enable":false,"recaptcha_enable":false,"recaptcha_login_enable":false,"recaptcha_register_enable":false,"recaptcha_server_key_dev":null,"recaptcha_server_key_local":null,"recaptcha_server_key_prod":null,"recaptcha_server_key_stage":null,"recaptcha_site_key_dev":null,"recaptcha_site_key_local":null,"recaptcha_site_key_prod":null,"recaptcha_site_key_stage":null,"remove_decimal_price_enable":true,"share_icon_email":false,"share_icon_facebook":true,"share_icon_line":false,"share_icon_linkedin":false,"share_icon_pinterest":true,"share_icon_telegram":false,"share_icon_twitter":true,"ves_menu_alias":"top-menu","ves_menu_enable":true},"store_name":"v1","welcome":"Default welcome msg!","timezone":"Asia/Jakarta","title_prefix":null,"title_suffix":null,"title_separator":"-","website_id":1,"weight_unit":"lbs","oauth_access_token_lifetime_customer":"1","pwa_checkout_debug_enable":"1","snap_client_key":"SB-Mid-client-1F64CqNZz3Nzvai2","allow_guest_checkout":true,"snap_is_production":"0","aw_blog_general_enabled":"1","pickup_store":true,"cookie_restriction":false,"login_phone_password":true,"forgot_password_phone":true,"global_promo":{"enable":true,"text_color":"#B05D5D","background_color":"#FFE8E8"},"weltpixel_newsletter_general_enable":"1","weltpixel_newsletter_general_version":"3","weltpixel_newsletter_general_overlay_color":"#000000","weltpixel_newsletter_general_overlay_opacity":"0.8","weltpixel_newsletter_general_display_mode":"1","weltpixel_newsletter_general_display_mobile":"1","weltpixel_newsletter_general_mobile_version":"3","weltpixel_newsletter_general_popup_cookie_lifetime":"4","weltpixel_newsletter_general_terms_conditions_consent":"1","weltpixel_newsletter_general_terms_conditions_text":"<a href=\"https://pearl.weltpixel.com/privacy-policy-cookie-restriction-mode\" target=\"_blank\">I agree to the Privacy Policy. </a>","weltpixel_newsletter_general_enable_trigger_button":"1","weltpixel_newsletter_general_trigger_button_title":"WANT A DISCOUNT?","weltpixel_newsletter_general_trigger_button_color":"#FFFFFF","weltpixel_newsletter_general_trigger_button_backgroundcolor":"#000000","aw_blog_general_comments_enabled":null,"aw_blog_general_disqus_forum_code":null,"aw_blog_related_products_block_layout":null,"aw_blog_related_products_block_position":"not_display","aw_blog_related_products_products_limit":8,"aw_blog_related_products_display_add_to_cart":null,"weltpixel_RecentlyViewedBar_general_enable":"0","weltpixel_thankyoupage_create_account_enable":true,"payment_travelokapay_public_key":"","payment_travelokapay_user_id":"621610c74c98b14ae3006a78","payment_travelokapay_bin_whitelist":null,"pin_location_latitude":-6.227599,"pin_location_longitude":106.8242503,"minimum_order_amount":null,"minimum_order_enable":null,"OmsRma":{"enable_oms_rma":true,"enable_oms_pwa_request_return":true,"oms_rma_link":"https://swiftoms-pwa.testingnow.me/requestreturn/request/request"},"oms_channel_code":"SWI"}}
+\ No newline at end of file
+
+From 2c09738ba7724131fbfd9075903dff1f577cd2a6 Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Tue, 6 Dec 2022 15:44:21 +0700
+Subject: [PATCH 06/18] fix([28923266] storeconfig - json):delete and ignore
+ file config.json
+
+---
+ .gitignore                    | 3 +--
+ core/api/rest/config.js       | 2 +-
+ core/api/rest/config/index.js | 2 +-
+ pages/test.js                 | 3 ---
+ 4 files changed, 3 insertions(+), 7 deletions(-)
+ delete mode 100644 pages/test.js
+
+diff --git a/.gitignore b/.gitignore
+index f8fb6bddb..449c59ede 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -34,5 +34,4 @@ package-lock.json
+ /public/static/firebase/*
+ 
+ #storeconfig
+-/core/api/rest/config/config.json
+-/core/api/rest/config/config2.json
+\ No newline at end of file
++/core/api/rest/config/config.json
+\ No newline at end of file
+diff --git a/core/api/rest/config.js b/core/api/rest/config.js
+index 6cf1caf91..ec498e498 100644
+--- a/core/api/rest/config.js
++++ b/core/api/rest/config.js
+@@ -257,7 +257,7 @@ const reqBody = gql`{
+ const generateConfig = (req, res) => {
+     graphQLClient.request(reqBody, {}).then((data) => {
+         console.log('generate config success');
+-        fs.writeFile(`${baseDir}config2.json`, JSON.stringify(data), (err) => {
++        fs.writeFile(`${baseDir}config.json`, JSON.stringify(data), (err) => {
+             if (err) throw err;
+         });
+         res.send(data);
+diff --git a/core/api/rest/config/index.js b/core/api/rest/config/index.js
+index 07dcf9931..642ecd74f 100644
+--- a/core/api/rest/config/index.js
++++ b/core/api/rest/config/index.js
+@@ -1,7 +1,7 @@
+ const fs = require('fs');
+ 
+ module.exports = (req, res) => {
+-    fs.readFile('./core/api/rest/config/config2.json', 'utf8', (err, jsonString) => {
++    fs.readFile('./core/api/rest/config/config.json', 'utf8', (err, jsonString) => {
+         if (err) {
+             console.log('File read failed:', err);
+             res.status(500).json(err);
+diff --git a/pages/test.js b/pages/test.js
+deleted file mode 100644
+index 0758b3644..000000000
+--- a/pages/test.js
++++ /dev/null
+@@ -1,3 +0,0 @@
+-const Test = () => <p>ini test</p>;
+-
+-export default Test;
+
+From 32d75fd3ce41ebbcbbec2926f0e790b76683076f Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Wed, 7 Dec 2022 10:44:26 +0700
+Subject: [PATCH 07/18] fix([28923266] generateconfig - auth):add Authorization
+ headers
+
+---
+ .../{config.js => config/generateconfig.js}   | 33 ++++++++++++-------
+ core/api/rest/config/index.js                 | 28 +++++++++++-----
+ core/api/rest/request/index.js                | 15 +++++++--
+ server.js                                     |  2 +-
+ 4 files changed, 54 insertions(+), 24 deletions(-)
+ rename core/api/rest/{config.js => config/generateconfig.js} (89%)
+
+diff --git a/core/api/rest/config.js b/core/api/rest/config/generateconfig.js
+similarity index 89%
+rename from core/api/rest/config.js
+rename to core/api/rest/config/generateconfig.js
+index ec498e498..2829b57e8 100644
+--- a/core/api/rest/config.js
++++ b/core/api/rest/config/generateconfig.js
+@@ -1,11 +1,14 @@
+ #! /usr/bin/env node
++/* eslint-disable eqeqeq */
++/* eslint-disable no-restricted-syntax */
+ const fs = require('fs');
+ const path = require('path');
+ const { GraphQLClient, gql } = require('graphql-request');
+-const { graphqlEndpoint } = require('../../../swift.config');
+-const { getAppEnv, getAccessEnv } = require('../../helpers/env');
++const { graphqlEndpoint } = require('../../../../swift.config');
++const { getAppEnv, getAccessEnv } = require('../../../helpers/env');
++const { getStoreHost } = require('../../../helpers/config');
+ 
+-const baseDir = path.join(__dirname, '../rest/config/');
++const baseDir = path.join(__dirname, '../config/');
+ 
+ const appEnv = getAppEnv();
+ 
+@@ -255,16 +258,22 @@ const reqBody = gql`{
+   }  `;
+ 
+ const generateConfig = (req, res) => {
+-    graphQLClient.request(reqBody, {}).then((data) => {
+-        console.log('generate config success');
+-        fs.writeFile(`${baseDir}config.json`, JSON.stringify(data), (err) => {
+-            if (err) throw err;
++    if (getAccessEnv() == req.headers.authorization) {
++        graphQLClient.request(reqBody, {}).then((data) => {
++            fs.writeFile(`${baseDir}config.json`, JSON.stringify(data), (err) => {
++                if (err) throw err;
++            });
++            res.send(data);
++        }).catch((err) => {
++            res.status(500).json(err);
++            // eslint-disable-next-line no-console
++            console.log('generate config failed', err);
+         });
+-        res.send(data);
+-    }).catch((err) => {
+-        res.status(500).json(err);
+-        console.log('generate config failed', err);
+-    });
++    } else {
++        window.location.replace(
++            getStoreHost(appEnv || 'prod'),
++        );
++    }
+ };
+ 
+ module.exports = generateConfig;
+diff --git a/core/api/rest/config/index.js b/core/api/rest/config/index.js
+index 642ecd74f..6e742ff0f 100644
+--- a/core/api/rest/config/index.js
++++ b/core/api/rest/config/index.js
+@@ -1,12 +1,24 @@
++/* eslint-disable eqeqeq */
++/* eslint-disable no-restricted-syntax */
+ const fs = require('fs');
++const { getAppEnv, getAccessEnv } = require('../../../helpers/env');
++const { getStoreHost } = require('../../../helpers/config');
+ 
+ module.exports = (req, res) => {
+-    fs.readFile('./core/api/rest/config/config.json', 'utf8', (err, jsonString) => {
+-        if (err) {
+-            console.log('File read failed:', err);
+-            res.status(500).json(err);
+-            return;
+-        }
+-        res.status(200).json(JSON.parse(jsonString));
+-    });
++    const appEnv = getAppEnv();
++    if (getAccessEnv() == req.headers.authorization) {
++        fs.readFile('./core/api/rest/config/config.json', 'utf8', (err, jsonString) => {
++            if (err) {
++            // eslint-disable-next-line no-console
++                console.log('File read failed:', err);
++                res.status(500).json(err);
++                return;
++            }
++            res.status(200).json(JSON.parse(jsonString));
++        });
++    } else {
++        window.location.replace(
++            getStoreHost(appEnv || 'prod'),
++        );
++    }
+ };
+diff --git a/core/api/rest/request/index.js b/core/api/rest/request/index.js
+index dca942ac4..97646cf32 100644
+--- a/core/api/rest/request/index.js
++++ b/core/api/rest/request/index.js
+@@ -1,13 +1,22 @@
+-const { getAppEnv } = require('../../../helpers/env');
++const { getAppEnv, getAccessEnv } = require('../../../helpers/env');
+ const { HOST } = require('../../../../swift.config');
+ 
+ function requestInternal(request) {
+     const appEnv = getAppEnv();
+     const url = HOST[appEnv] || HOST.prod;
+     return new Promise((resolve) => {
+-        fetch(`${url}/${request}`)
++        fetch(`${url}/${request}`, {
++            headers: {
++                Authorization: `${getAccessEnv()}`,
++                'Content-Type': 'application/json',
++            },
++        })
+             .then((response) => response.json())
+-            .then((data) => resolve(data));
++            .then((data) => resolve(data))
++            .catch((err) => {
++                // eslint-disable-next-line no-console
++                console.log(err);
++            });
+     });
+ }
+ 
+diff --git a/server.js b/server.js
+index 00abac1c3..54034d71b 100644
+--- a/server.js
++++ b/server.js
+@@ -23,7 +23,7 @@ const {
+     expiredToken, nossrCache, features, assetsVersion,
+ } = require('./swift.config');
+ const generateXml = require('./core/api/rest/xml');
+-const generateConfig = require('./core/api/rest/config');
++const generateConfig = require('./core/api/rest/config/generateconfig');
+ const getConfig = require('./core/api/rest/config');
+ const captchaValidation = require('./core/api/rest/captcha');
+ const firebaseValidation = require('./core/api/rest/firebase-cloud-messaging');
+
+From 382e7de677b1fb4f4ab2f655f4468447438874ad Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Wed, 7 Dec 2022 15:07:17 +0700
+Subject: [PATCH 08/18] fix([28923286] graphql - introspection):add token from
+ env
+
+---
+ core/api/graphql/remote/index.js | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/core/api/graphql/remote/index.js b/core/api/graphql/remote/index.js
+index 0b894c774..cd4dabfde 100644
+--- a/core/api/graphql/remote/index.js
++++ b/core/api/graphql/remote/index.js
+@@ -4,7 +4,7 @@ const { print } = require('graphql');
+ const { wrapSchema, introspectSchema } = require('@graphql-tools/wrap');
+ const { graphqlEndpoint, storeCode } = require('../../../../swift.config');
+ const { decrypt } = require('../../../helpers/encryption');
+-const { getAppEnv } = require('../../../helpers/env');
++const { getAppEnv, getAccessEnv } = require('../../../helpers/env');
+ 
+ const executor = async ({ document, variables, context }) => {
+     try {
+@@ -29,6 +29,8 @@ const executor = async ({ document, variables, context }) => {
+         const url = graphqlEndpoint[appEnv] || graphqlEndpoint.prod;
+         if (token && token !== '') {
+             additionalHeader.Authorization = `Bearer ${decrypt(token)}`;
++        } else {
++            additionalHeader.Authorization = `Bearer ${getAccessEnv()}`;
+         }
+         if (checkoutToken && checkoutToken !== '') {
+             additionalHeader['Checkout-Token'] = `${decrypt(checkoutToken)}`;
+
+From 5fb2113461c00370a0ba7f8f5f53b1888c3233be Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Thu, 8 Dec 2022 10:24:46 +0700
+Subject: [PATCH 09/18] fix([28923266] generateconfig - auth): add bearer in
+ Authorization
+
+---
+ core/api/rest/config/generateconfig.js | 218 ++++++++++++-------------
+ core/api/rest/config/index.js          |  10 +-
+ core/api/rest/request/index.js         |   2 +-
+ 3 files changed, 109 insertions(+), 121 deletions(-)
+
+diff --git a/core/api/rest/config/generateconfig.js b/core/api/rest/config/generateconfig.js
+index 2829b57e8..112a56d00 100644
+--- a/core/api/rest/config/generateconfig.js
++++ b/core/api/rest/config/generateconfig.js
+@@ -6,7 +6,6 @@ const path = require('path');
+ const { GraphQLClient, gql } = require('graphql-request');
+ const { graphqlEndpoint } = require('../../../../swift.config');
+ const { getAppEnv, getAccessEnv } = require('../../../helpers/env');
+-const { getStoreHost } = require('../../../helpers/config');
+ 
+ const baseDir = path.join(__dirname, '../config/');
+ 
+@@ -26,37 +25,8 @@ const graphQLClient = new GraphQLClient(`${graphqlEndpoint[appEnv] || graphqlEnd
+ 
+ const reqBody = gql`{
+     storeConfig {
+-      secure_base_media_url
+-      secure_base_static_url
+-      customer_password_minimum_password_length
+-      customer_password_required_character_classes_number
+-      base_media_url
+-      base_static_url
+-      base_url
+-      base_currency_code
+-      code
+-      catalog_search_engine
+-      copyright
+-      catalog_default_sort_by
+-      category_url_suffix
+-      default_title
+-      default_keywords
+-      default_description
+-      default_display_currency_code
+-      date_of_birth
+-      gender
+-      general_country_default
+-      header_logo_src
+-      head_shortcut_icon
+-      icube_pinlocation_gmap_key
+-      icube_pinlocation_geocoding_key
+-      locale
+-      logo_alt
+-      logo_width
+-      logo_height
+-      shipments_configuration
+-      payments_configuration
+-      pwa {
++    cms_page
++    pwa {
+         use_cms_page_enable
+         use_cms_page_identifier
+         banner_slider_enable
+@@ -81,28 +51,6 @@ const reqBody = gql`{
+         category_list_image_size_mobile_width
+         features_product_enable
+         features_product_url_key
+-        primary_color
+-        secondary_color
+-        background_color
+-        error_color
+-        warning_msg_color
+-        success_msg_color
+-        font_color
+-        default_font
+-        heading_font
+-        button_background_color
+-        button_background_hover_color
+-        button_disabled_text_color
+-        button_disabled_background_color
+-        button_text_color
+-        button_text_hover_color
+-        button_disabled_text_color
+-        button_border_color
+-        button_border_hover_color
+-        link_color
+-        link_hover_color
+-        link_font_decoration
+-        link_font_hover_decoration
+         add_to_cart_enable
+         app_name
+         cms_contact_identifiers
+@@ -184,7 +132,6 @@ const reqBody = gql`{
+         heading_font
+         button_background_color
+         button_background_hover_color
+-        button_disabled_text_color
+         button_disabled_background_color
+         button_text_color
+         button_text_hover_color
+@@ -195,70 +142,117 @@ const reqBody = gql`{
+         link_hover_color
+         link_font_decoration
+         link_font_hover_decoration
+-      }
+-      store_name
+-      welcome
+-      timezone
+-      title_prefix
+-      title_suffix
+-      title_separator
+-      website_id
+-      weight_unit
+-      oauth_access_token_lifetime_customer
+-      pwa_checkout_debug_enable
+-      snap_client_key
+-      allow_guest_checkout
+-      snap_is_production
+-      aw_blog_general_enabled
+-      pickup_store
+-      cookie_restriction
+-      login_phone_password
+-      forgot_password_phone
+-      global_promo {
++    }
++    secure_base_media_url
++    secure_base_static_url
++    customer_password_minimum_password_length
++    customer_password_required_character_classes_number
++    base_media_url
++    base_static_url
++    base_url
++    base_currency_code
++    code
++    catalog_search_engine
++    copyright
++    catalog_default_sort_by
++    category_url_suffix
++    default_title
++    enable_oms_multiseller
++    default_keywords
++    default_description
++    default_display_currency_code
++    date_of_birth
++    gender
++    general_country_default
++    header_logo_src
++    head_shortcut_icon
++    icube_pinlocation_gmap_key
++    icube_pinlocation_geocoding_key
++    locale
++    logo_alt
++    logo_width
++    logo_height
++    shipments_configuration
++    payments_configuration
++    store_name
++    welcome
++    timezone
++    title_prefix
++    title_suffix
++    title_separator
++    website_id
++    weight_unit
++    oauth_access_token_lifetime_customer
++    pwa_checkout_debug_enable
++    snap_client_key
++    stripe_config {
++        stripe_mode
++        test_pk
++        live_pk
++    }
++    paypal_key {
++        cancel_url
++        client_id
++        client_secret
++        disable_funding
++        intent
++        key_data
++        key_token
++        path
++        return_url
++    }
++    allow_guest_checkout
++    snap_is_production
++    aw_blog_general_enabled
++    pickup_store
++    cookie_restriction
++    login_phone_password
++    forgot_password_phone
++    global_promo {
+         enable
+         text_color
+         background_color
+-      }
+-      weltpixel_newsletter_general_enable
+-      weltpixel_newsletter_general_version
+-      weltpixel_newsletter_general_overlay_color
+-      weltpixel_newsletter_general_overlay_opacity
+-      weltpixel_newsletter_general_display_mode
+-      weltpixel_newsletter_general_display_mobile
+-      weltpixel_newsletter_general_mobile_version
+-      weltpixel_newsletter_general_popup_cookie_lifetime
+-      weltpixel_newsletter_general_terms_conditions_consent
+-      weltpixel_newsletter_general_terms_conditions_text
+-      weltpixel_newsletter_general_enable_trigger_button
+-      weltpixel_newsletter_general_trigger_button_title
+-      weltpixel_newsletter_general_trigger_button_color
+-      weltpixel_newsletter_general_trigger_button_backgroundcolor
+-      aw_blog_general_comments_enabled
+-      aw_blog_general_disqus_forum_code
+-      aw_blog_related_products_block_layout
+-      aw_blog_related_products_block_position
+-      aw_blog_related_products_products_limit
+-      aw_blog_related_products_display_add_to_cart
+-      weltpixel_RecentlyViewedBar_general_enable
+-      weltpixel_thankyoupage_create_account_enable
+-      payment_travelokapay_public_key
+-      payment_travelokapay_user_id
+-      payment_travelokapay_bin_whitelist
+-      pin_location_latitude
+-      pin_location_longitude
+-      minimum_order_amount
+-      minimum_order_enable
+-      OmsRma{
++    }
++    weltpixel_newsletter_general_enable
++    weltpixel_newsletter_general_version
++    weltpixel_newsletter_general_overlay_color
++    weltpixel_newsletter_general_overlay_opacity
++    weltpixel_newsletter_general_display_mode
++    weltpixel_newsletter_general_display_mobile
++    weltpixel_newsletter_general_mobile_version
++    weltpixel_newsletter_general_popup_cookie_lifetime
++    weltpixel_newsletter_general_terms_conditions_consent
++    weltpixel_newsletter_general_terms_conditions_text
++    weltpixel_newsletter_general_enable_trigger_button
++    weltpixel_newsletter_general_trigger_button_title
++    weltpixel_newsletter_general_trigger_button_color
++    weltpixel_newsletter_general_trigger_button_backgroundcolor
++    aw_blog_general_comments_enabled
++    aw_blog_general_disqus_forum_code
++    aw_blog_related_products_block_layout
++    aw_blog_related_products_block_position
++    aw_blog_related_products_products_limit
++    aw_blog_related_products_display_add_to_cart
++    weltpixel_RecentlyViewedBar_general_enable
++    weltpixel_thankyoupage_create_account_enable
++    payment_travelokapay_public_key
++    payment_travelokapay_user_id
++    payment_travelokapay_bin_whitelist
++    pin_location_latitude
++    pin_location_longitude
++    minimum_order_amount
++    minimum_order_enable
++    OmsRma {
+         enable_oms_rma
+         enable_oms_pwa_request_return
+         oms_rma_link
+-      }
+-      oms_channel_code
+     }
+-  }  `;
++    oms_channel_code
++    }
++}`;
+ 
+ const generateConfig = (req, res) => {
+-    if (getAccessEnv() == req.headers.authorization) {
++    if (`Bearer ${getAccessEnv()}` == req.headers.authorization) {
+         graphQLClient.request(reqBody, {}).then((data) => {
+             fs.writeFile(`${baseDir}config.json`, JSON.stringify(data), (err) => {
+                 if (err) throw err;
+@@ -270,9 +264,7 @@ const generateConfig = (req, res) => {
+             console.log('generate config failed', err);
+         });
+     } else {
+-        window.location.replace(
+-            getStoreHost(appEnv || 'prod'),
+-        );
++        res.status(403).json({ message: 'Token Invalid' });
+     }
+ };
+ 
+diff --git a/core/api/rest/config/index.js b/core/api/rest/config/index.js
+index 6e742ff0f..0df572db7 100644
+--- a/core/api/rest/config/index.js
++++ b/core/api/rest/config/index.js
+@@ -1,12 +1,10 @@
+ /* eslint-disable eqeqeq */
+ /* eslint-disable no-restricted-syntax */
+ const fs = require('fs');
+-const { getAppEnv, getAccessEnv } = require('../../../helpers/env');
+-const { getStoreHost } = require('../../../helpers/config');
++const { getAccessEnv } = require('../../../helpers/env');
+ 
+ module.exports = (req, res) => {
+-    const appEnv = getAppEnv();
+-    if (getAccessEnv() == req.headers.authorization) {
++    if (`Bearer ${getAccessEnv()}` == req.headers.authorization) {
+         fs.readFile('./core/api/rest/config/config.json', 'utf8', (err, jsonString) => {
+             if (err) {
+             // eslint-disable-next-line no-console
+@@ -17,8 +15,6 @@ module.exports = (req, res) => {
+             res.status(200).json(JSON.parse(jsonString));
+         });
+     } else {
+-        window.location.replace(
+-            getStoreHost(appEnv || 'prod'),
+-        );
++        res.status(403).json({ message: 'Token Invalid' });
+     }
+ };
+diff --git a/core/api/rest/request/index.js b/core/api/rest/request/index.js
+index 97646cf32..e045adc73 100644
+--- a/core/api/rest/request/index.js
++++ b/core/api/rest/request/index.js
+@@ -7,7 +7,7 @@ function requestInternal(request) {
+     return new Promise((resolve) => {
+         fetch(`${url}/${request}`, {
+             headers: {
+-                Authorization: `${getAccessEnv()}`,
++                Authorization: `Bearer ${getAccessEnv()}`,
+                 'Content-Type': 'application/json',
+             },
+         })
+
+From e061fc3858a73d00608ec74e07de916aeb9f73ea Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Thu, 8 Dec 2022 10:52:17 +0700
+Subject: [PATCH 10/18] fix([28923266] slug - storeconfig):change to request
+ internal
+
+---
+ core/modules/slug/index.js | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/core/modules/slug/index.js b/core/modules/slug/index.js
+index 3c68fc431..3eddddd79 100644
+--- a/core/modules/slug/index.js
++++ b/core/modules/slug/index.js
+@@ -1,7 +1,6 @@
+ import { withApollo } from '@lib_apollo';
+ import { withTranslation } from '@i18n';
+-import { getCmsList } from '@services/graphql/schema/config';
+-import graphRequest from '@graphql_request';
++import requestInternal from '@rest_request';
+ import { storeConfigNameCookie } from '@config';
+ import Core from '@core_modules/slug/core';
+ 
+@@ -18,7 +17,7 @@ const Page = (props) => (
+ Page.getInitialProps = async ({ query, req }) => {
+     let cmsList = {};
+     if (typeof window === 'undefined' && !req.cookies[storeConfigNameCookie]) {
+-        cmsList = await graphRequest(getCmsList);
++        cmsList = await requestInternal('getConfig');
+     }
+     const allcookie = req ? req.cookies : {};
+     const obj = {
+
+From d1480f5d06a68ea4d7aed82ed12c187e27b03d68 Mon Sep 17 00:00:00 2001
+From: Asih Priyatno <asih.priyatno@sirclo.com>
+Date: Thu, 8 Dec 2022 11:38:14 +0700
+Subject: [PATCH 11/18] feat([28923266] internal request) add custom field to
+ get config
+
+---
+ core/api/rest/config/index.js | 13 ++++++++++++-
+ core/modules/slug/index.js    |  2 +-
+ 2 files changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/core/api/rest/config/index.js b/core/api/rest/config/index.js
+index 0df572db7..6bca88529 100644
+--- a/core/api/rest/config/index.js
++++ b/core/api/rest/config/index.js
+@@ -12,7 +12,18 @@ module.exports = (req, res) => {
+                 res.status(500).json(err);
+                 return;
+             }
+-            res.status(200).json(JSON.parse(jsonString));
++            let response = JSON.parse(jsonString);
++            if (req.query.field) {
++                const field = req.query.field.split(',');
++                const tempResponse = {};
++                field.forEach((element) => {
++                    if (response.storeConfig && response.storeConfig[element]) {
++                        tempResponse[element] = response.storeConfig[element];
++                    }
++                });
++                response = tempResponse;
++            }
++            res.status(200).json(response);
+         });
+     } else {
+         res.status(403).json({ message: 'Token Invalid' });
+diff --git a/core/modules/slug/index.js b/core/modules/slug/index.js
+index 3eddddd79..7852fccf5 100644
+--- a/core/modules/slug/index.js
++++ b/core/modules/slug/index.js
+@@ -17,7 +17,7 @@ const Page = (props) => (
+ Page.getInitialProps = async ({ query, req }) => {
+     let cmsList = {};
+     if (typeof window === 'undefined' && !req.cookies[storeConfigNameCookie]) {
+-        cmsList = await requestInternal('getConfig');
++        cmsList = await requestInternal('getConfig?field=cms_page');
+     }
+     const allcookie = req ? req.cookies : {};
+     const obj = {
+
+From 12f52831e7b45e063994cdf31155f50efb000ccd Mon Sep 17 00:00:00 2001
+From: Asih Priyatno <asih.priyatno@sirclo.com>
+Date: Thu, 8 Dec 2022 14:34:24 +0700
+Subject: [PATCH 12/18] feat([28923266] internal request) add custom field to
+ get config
+
+---
+ core/modules/setting/services/graphql/index.js | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/core/modules/setting/services/graphql/index.js b/core/modules/setting/services/graphql/index.js
+index 7189e1d9f..35afafaa7 100644
+--- a/core/modules/setting/services/graphql/index.js
++++ b/core/modules/setting/services/graphql/index.js
+@@ -2,8 +2,12 @@
+ import { useQuery } from '@apollo/client';
+ import schema from '@core_modules/setting/services/graphql/schema';
+ 
+-export const getCurrency = () => useQuery(schema.getCurrencySchema);
+-export const getStoreName = () => useQuery(schema.getStoreName);
++export const getCurrency = () => useQuery(schema.getCurrencySchema, {
++    skip: typeof window === 'undefined',
++});
++export const getStoreName = () => useQuery(schema.getStoreName, {
++    skip: typeof window === 'undefined',
++});
+ 
+ export default {
+     getCurrency,
+
+From 0dbee46589e5e440fcc090d541596118922c681c Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Fri, 9 Dec 2022 10:31:42 +0700
+Subject: [PATCH 13/18] fix([28923266] generateconfig - auth):change with
+ encryption key
+
+---
+ core/api/rest/config/generateconfig.js | 4 ++--
+ core/api/rest/config/index.js          | 4 ++--
+ core/api/rest/request/index.js         | 4 ++--
+ core/helpers/env.js                    | 3 +++
+ 4 files changed, 9 insertions(+), 6 deletions(-)
+
+diff --git a/core/api/rest/config/generateconfig.js b/core/api/rest/config/generateconfig.js
+index 112a56d00..e8571aaec 100644
+--- a/core/api/rest/config/generateconfig.js
++++ b/core/api/rest/config/generateconfig.js
+@@ -5,7 +5,7 @@ const fs = require('fs');
+ const path = require('path');
+ const { GraphQLClient, gql } = require('graphql-request');
+ const { graphqlEndpoint } = require('../../../../swift.config');
+-const { getAppEnv, getAccessEnv } = require('../../../helpers/env');
++const { getAppEnv, getAccessEnv, getEncryptEnv } = require('../../../helpers/env');
+ 
+ const baseDir = path.join(__dirname, '../config/');
+ 
+@@ -252,7 +252,7 @@ const reqBody = gql`{
+ }`;
+ 
+ const generateConfig = (req, res) => {
+-    if (`Bearer ${getAccessEnv()}` == req.headers.authorization) {
++    if (`Bearer ${getEncryptEnv()}` == req.headers.authorization) {
+         graphQLClient.request(reqBody, {}).then((data) => {
+             fs.writeFile(`${baseDir}config.json`, JSON.stringify(data), (err) => {
+                 if (err) throw err;
+diff --git a/core/api/rest/config/index.js b/core/api/rest/config/index.js
+index 6bca88529..c6c00b329 100644
+--- a/core/api/rest/config/index.js
++++ b/core/api/rest/config/index.js
+@@ -1,10 +1,10 @@
+ /* eslint-disable eqeqeq */
+ /* eslint-disable no-restricted-syntax */
+ const fs = require('fs');
+-const { getAccessEnv } = require('../../../helpers/env');
++const { getEncryptEnv } = require('../../../helpers/env');
+ 
+ module.exports = (req, res) => {
+-    if (`Bearer ${getAccessEnv()}` == req.headers.authorization) {
++    if (`Bearer ${getEncryptEnv()}` == req.headers.authorization) {
+         fs.readFile('./core/api/rest/config/config.json', 'utf8', (err, jsonString) => {
+             if (err) {
+             // eslint-disable-next-line no-console
+diff --git a/core/api/rest/request/index.js b/core/api/rest/request/index.js
+index e045adc73..5b466901a 100644
+--- a/core/api/rest/request/index.js
++++ b/core/api/rest/request/index.js
+@@ -1,4 +1,4 @@
+-const { getAppEnv, getAccessEnv } = require('../../../helpers/env');
++const { getAppEnv, getEncryptEnv } = require('../../../helpers/env');
+ const { HOST } = require('../../../../swift.config');
+ 
+ function requestInternal(request) {
+@@ -7,7 +7,7 @@ function requestInternal(request) {
+     return new Promise((resolve) => {
+         fetch(`${url}/${request}`, {
+             headers: {
+-                Authorization: `Bearer ${getAccessEnv()}`,
++                Authorization: `Bearer ${getEncryptEnv()}`,
+                 'Content-Type': 'application/json',
+             },
+         })
+diff --git a/core/helpers/env.js b/core/helpers/env.js
+index 3c5532dbc..683c2b8a1 100644
+--- a/core/helpers/env.js
++++ b/core/helpers/env.js
+@@ -8,7 +8,10 @@ const getAppEnv = () => {
+ 
+ const getAccessEnv = () => process.env.ACCESS_KEY;
+ 
++const getEncryptEnv = () => process.env.ENCRYPTION_KEY;
++
+ module.exports = {
+     getAppEnv,
+     getAccessEnv,
++    getEncryptEnv,
+ };
+
+From 0bba8353008898900e992c2755cf801398e5dbaa Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Fri, 9 Dec 2022 12:57:05 +0700
+Subject: [PATCH 14/18] fix([28923266] app.js - console):delete console.log
+
+---
+ core/modules/theme/pages/_app.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/modules/theme/pages/_app.js b/core/modules/theme/pages/_app.js
+index 15e042c72..25393870d 100644
+--- a/core/modules/theme/pages/_app.js
++++ b/core/modules/theme/pages/_app.js
+@@ -174,7 +174,7 @@ class MyApp extends App {
+ 
+                 storeConfig = storeConfig.storeConfig;
+             }
+-            console.log(storeConfig);
++
+             if (!modules.checkout.checkoutOnly) {
+                 dataVesMenu = getLocalStorage('pwa_vesmenu');
+                 if (!dataVesMenu) {
+
+From 67f50568f0f25b64ff87c1bdc08e0e292d569d16 Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Mon, 12 Dec 2022 09:34:45 +0700
+Subject: [PATCH 15/18] fix([28923266] auth - encrypt): change to encryption
+ key
+
+---
+ core/helpers/env.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/helpers/env.js b/core/helpers/env.js
+index 683c2b8a1..bce4e0b34 100644
+--- a/core/helpers/env.js
++++ b/core/helpers/env.js
+@@ -8,7 +8,7 @@ const getAppEnv = () => {
+ 
+ const getAccessEnv = () => process.env.ACCESS_KEY;
+ 
+-const getEncryptEnv = () => process.env.ENCRYPTION_KEY;
++const getEncryptEnv = () => process.env.NEXT_PUBLIC_ENCRYPTION_KEY;
+ 
+ module.exports = {
+     getAppEnv,
+
+From dc50128bcd2a64ed776d185fe2fd06a9dabcd4b1 Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Mon, 12 Dec 2022 10:13:19 +0700
+Subject: [PATCH 16/18] fix([28923266] auth - encrypt):fix encryption key
+
+---
+ core/api/rest/config/index.js  | 4 ++--
+ core/api/rest/request/index.js | 4 ++--
+ core/helpers/env.js            | 2 +-
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/core/api/rest/config/index.js b/core/api/rest/config/index.js
+index c6c00b329..6bca88529 100644
+--- a/core/api/rest/config/index.js
++++ b/core/api/rest/config/index.js
+@@ -1,10 +1,10 @@
+ /* eslint-disable eqeqeq */
+ /* eslint-disable no-restricted-syntax */
+ const fs = require('fs');
+-const { getEncryptEnv } = require('../../../helpers/env');
++const { getAccessEnv } = require('../../../helpers/env');
+ 
+ module.exports = (req, res) => {
+-    if (`Bearer ${getEncryptEnv()}` == req.headers.authorization) {
++    if (`Bearer ${getAccessEnv()}` == req.headers.authorization) {
+         fs.readFile('./core/api/rest/config/config.json', 'utf8', (err, jsonString) => {
+             if (err) {
+             // eslint-disable-next-line no-console
+diff --git a/core/api/rest/request/index.js b/core/api/rest/request/index.js
+index 5b466901a..e045adc73 100644
+--- a/core/api/rest/request/index.js
++++ b/core/api/rest/request/index.js
+@@ -1,4 +1,4 @@
+-const { getAppEnv, getEncryptEnv } = require('../../../helpers/env');
++const { getAppEnv, getAccessEnv } = require('../../../helpers/env');
+ const { HOST } = require('../../../../swift.config');
+ 
+ function requestInternal(request) {
+@@ -7,7 +7,7 @@ function requestInternal(request) {
+     return new Promise((resolve) => {
+         fetch(`${url}/${request}`, {
+             headers: {
+-                Authorization: `Bearer ${getEncryptEnv()}`,
++                Authorization: `Bearer ${getAccessEnv()}`,
+                 'Content-Type': 'application/json',
+             },
+         })
+diff --git a/core/helpers/env.js b/core/helpers/env.js
+index bce4e0b34..683c2b8a1 100644
+--- a/core/helpers/env.js
++++ b/core/helpers/env.js
+@@ -8,7 +8,7 @@ const getAppEnv = () => {
+ 
+ const getAccessEnv = () => process.env.ACCESS_KEY;
+ 
+-const getEncryptEnv = () => process.env.NEXT_PUBLIC_ENCRYPTION_KEY;
++const getEncryptEnv = () => process.env.ENCRYPTION_KEY;
+ 
+ module.exports = {
+     getAppEnv,
+
+From 6c2bc5a3fb15561a5c74abca32c96ba578c72196 Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Wed, 14 Dec 2022 14:00:25 +0700
+Subject: [PATCH 17/18] fix([28923266] ProductItem - Detail):fix seller_name
+ undefined
+
+---
+ core/modules/catalog/plugins/ProductItem/components/Detail.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/modules/catalog/plugins/ProductItem/components/Detail.js b/core/modules/catalog/plugins/ProductItem/components/Detail.js
+index 987229b7b..1e9e5adf4 100644
+--- a/core/modules/catalog/plugins/ProductItem/components/Detail.js
++++ b/core/modules/catalog/plugins/ProductItem/components/Detail.js
+@@ -61,7 +61,7 @@ const Detail = (props) => {
+                     {name}
+                 </a>
+             </Link>
+-            {enableMultiSeller && seller.seller_name && (
++            {enableMultiSeller && seller && seller.seller_name && (
+                 <div className={styles.infoSeller}>
+                     <StorefrontIcon className={styles.iconSeller} />
+                     <Typography variant="p" className={styles.productTitle} letter="capitalize">
+
+From e0fbfff4256421994d9a92107f18fdf5663f2844 Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Wed, 14 Dec 2022 14:25:10 +0700
+Subject: [PATCH 18/18] fix([28923266] Optimize - app.js):delete double
+ frontendOptions
+
+---
+ core/modules/theme/pages/_app.js | 12 ------------
+ 1 file changed, 12 deletions(-)
+
+diff --git a/core/modules/theme/pages/_app.js b/core/modules/theme/pages/_app.js
+index 25393870d..3951a2fcb 100644
+--- a/core/modules/theme/pages/_app.js
++++ b/core/modules/theme/pages/_app.js
+@@ -127,18 +127,6 @@ class MyApp extends App {
+         let frontendOptions;
+         let { storeConfig } = pageProps;
+ 
+-        if (typeof window !== 'undefined') {
+-            frontendOptions = await pageProps.apolloClient
+-                .query({
+-                    query: gql`
+-                        ${FrontendSchema}
+-                    `,
+-                })
+-                .then(({ data }) => data);
+-            if (ctx && frontendOptions && frontendOptions.response && frontendOptions.response.status && frontendOptions.response.status > 500) {
+-                ctx.res.redirect('/maintenance');
+-            }
+-        }
+         if (typeof window === 'undefined' && (!storeConfig || typeof storeConfig.secure_base_media_url === 'undefined')) {
+             // storeConfig = await apolloClient.query({ query: ConfigSchema }).then(({ data }) => data.storeConfig);
+             storeConfig = await requestInternal('getConfig');

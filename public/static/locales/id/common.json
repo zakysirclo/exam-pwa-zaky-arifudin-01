@@ -1,0 +1,256 @@
+{
+    "variant": "Varian",
+    "home": {
+        "logoName": "LOGO",
+        "title": "Beranda"
+    },
+    "product": {
+        "title_product": "Nama Produk",
+        "name": "Produk"
+    },
+    "search": {
+        "title": "Apa yang anda cari?",
+        "mainTitle": "Koleksi terbaru",
+        "backTitle": "kembali ke produk",
+        "location": "Cari Lokasi",
+        "addressDetail": "Please input your address detail"
+    },
+    "button": {
+        "edit": "Edit",
+        "save": "Simpan",
+        "saved": "Tersimpan",
+        "startShopping": "Mulai Berbelanja",
+        "continueShopping": "Lanjut Berbelanja",
+        "confirm": "Konfirmasi",
+        "cancel": "Batal",
+        "yes": "Ya",
+        "no": "Tidak",
+        "checkout": "Checkout",
+        "change": "Ubah",
+        "send": "kirim",
+        "manage": "Manage",
+        "addAddress": "Tambah Alamat",
+        "loadMore": "Lihat lagi",
+        "clear": "Bersihkan",
+        "verify": "Verifikasi",
+        "shop": "Beli Sekarang",
+        "sendOtp": "Kirim OTP",
+        "submit": "Kirimkan",
+        "viewAll": "Lihat Semua",
+        "goCheckout": "Checkout",
+        "viewandedit": "Lihat dan Ubah",
+        "addToCart": "Tambah ke Keranjang",
+        "allowCookies": "Ijinkan Cookie",
+        "simulateQrCode": "Sumulasi Pembayaran Qrcode",
+        "submitReview": "Kirim Ulasan",
+        "viewItem": "Lihat Item",
+        "apply": "Terapkan",
+        "remove": "Hapus"
+    },
+    "cart": {
+        "myCart": "Cart Saya",
+        "cardTotal": "Subtotal",
+        "deleteSuccess": "Hapus item cart berhasil",
+        "deleteFailed": "Hapus item cart gagal",
+        "updateSuccess": "Update item cart berhasil",
+        "updateFailed": "Update item cart gagal",
+        "emptyCart": "Keranjang Anda saat ini kosong.",
+        "oos": "Stok habis",
+        "inStock": "Stok tersedia",
+        "cartError": "Ada kesalahan di keranjang anda, silahkan bersihkan dan ulangi kembali"
+    },
+    "subtotal": "Subtotal",
+    "price": {
+        "asLowAs": "Termurah",
+        "startFrom": "Mulai dari"
+    },
+    "qty": "Jumlah",
+    "form": {
+        "firstName": "Nama Depan",
+        "lastName": "Nama Belakang",
+        "phoneNumber": "Nomor Telepon",
+        "gender": "Jenis Kelamin",
+        "emailAddress": "Alamat Email",
+        "email": "Email",
+        "dob": "Tanggal Lahir",
+        "confirm": "Konfirmasi Password",
+        "currentPasword": "Password Lama",
+        "state": "Bagian / Provinsi",
+        "region": "Negara",
+        "city": "Kota",
+        "country": "Negara",
+        "street": "Alamat Jalan",
+        "postal": "Kode Pos",
+        "select": "Pilih Salah Satu",
+        "addressDetail": "Detil Alamat",
+        "mapError": "Tidak dapat memuat peta. Silahkan periksa koneksi internet anda.",
+        "mapLoading": "Memuat peta...",
+        "maxChar": "Maksimal {{length}} Karakter"
+    },
+    "placeholder": {
+        "email": "contoh: user@gmail.com",
+        "firstName": "contoh: John Doe",
+        "lastName": "contoh: Doe"
+    },
+    "title": {
+        "qty": "Jumlah",
+        "color": "Warna",
+        "size": "Ukuran",
+        "shortFilter": "Urutan & Filter",
+        "short": "Urutkan dari",
+        "search": "Pencarian ...",
+        "brand": "Brand",
+        "category": "Kategory",
+        "summary": "Ringkasan order",
+        "price": "Harga",
+        "shortQty": "Jml",
+        "action": "Aksi",
+        "extraFee": "Biaya Tambahan",
+        "relatedProduct": "Orang juga membeli",
+        "sale": "Diskon",
+        "new": "Baru",
+        "free": "Free",
+        "none": "Tidak ada",
+        "note": "Catatan",
+        "sku": "SKU"
+    },
+    "error": {
+        "notFound": "Data tidak di temukan",
+        "fileReject": "Tidak dapat mengupload file harus ber type ",
+        "fetchError": "Terjadi kesalahan. Silakan coba lagi nanti",
+        "browser": "Browser tidak didukung",
+        "videoNotSupported": "Browser anda tidak mendukung elemen video.",
+        "captcha": "Gagal verifikasi recaptcha, Silakan coba lagi.",
+        "wentWrong": "Terjadi kesalahan. Silakan coba lagi nanti.",
+        "webpNotSupported": "WebP tidak disupport pada browser anda. Silahkan mengunduh browser versi terbaru untuk meningkatkan pengalaman browsing anda."
+    },
+    "fileUpload": {
+        "reject": "Tidak dapat mengupload, file harus ber type  ",
+        "dragActive": "Tarik file kesini",
+        "dragNonActive": "Pilih atau tarik file disini",
+        "maxSizeImage": "Maksimal ukuran gambar "
+    },
+    "menu": {
+        "confirmpayment": "Konfirmasi Pembayaran",
+        "trackingorder": "Lacak Pesanan",
+        "sign": "Masuk",
+        "register": "Buat Akun",
+        "account": "Akun",
+        "or": "Atau",
+        "notification": "Notifikasi",
+        "myaccount": "Akun Saya",
+        "mywishlist": "Daftar Saya",
+        "signout": "keluar",
+        "loading": "Menunggu",
+        "others": "Lainnya"
+    },
+    "header": {
+        "welcome": "Selamat Datang!",
+        "hi": "Hai, $!",
+        "downloadApps": "Unduh Aplikasi"
+    },
+    "message": {
+        "feedSuccess": "Produk berhasil di tambahkan ke wishlist",
+        "feedFailed": "Tambah wishlist gagal",
+        "browserError": "Silahkan ganti browser atau cek setingan cookies, javascript atau lainnya",
+        "restrictionCookies": "Kami menggunakan cookie untuk membuat pengalaman Anda lebih baik. Untuk mematuhi arahan e-Privacy yang baru, kami perlu meminta persetujuan Anda untuk menyetel cookie. Pelajari lebih lanjut.",
+        "selectOptionFailed": "Silahkan pilih opsi produk terlebih dahulu"
+    },
+    "newsletter": {
+        "title": "DAFTAR NEWSLETTER",
+        "placeholder": "Masukkan alamat email Anda",
+        "buttonLabel": "Langganan",
+        "emailFormat": "Format email salah",
+        "emptyValue": "Harap masukkan alamat email",
+        "firstname": "Masukkan nama depan anda",
+        "lastname": "Masukkan nama belakang anda"
+    },
+    "setting": {
+        "title": "Pengaturan",
+        "language": "Bahasa",
+        "store": "Toko",
+        "currency": "Mata Uang",
+        "changeto": "Ganti ke"
+    },
+    "recentlyView": {
+        "title" : "Baru Saja Dilihat"
+    },
+    "instagramFeed": {
+        "shareFb": "Bagikan ke facebook",
+        "tweet": "Tweet",
+        "pinit": "Sematkan",
+        "downloadImage": "Unduh gambar"
+    },
+    "productCompare": {
+        "title": "Product Compare",
+        "successCompare" : "Produk berhasil di tambahkan",
+        "failedCompare" : "Produk gagal ditambahkan",
+        "existProduct" : "Produk sudah ada di keranjang compare",
+        "emptyCompare" : "Daftar perbandingan Anda kosong",
+        "successRemove": "Product compare berhasil dihapus",
+        "failedRemove": "Product compare gagal dihapus",
+        "label": {
+            "sku": "sku",
+            "description": "Deskripsi",
+            "shortDescription": "Deskripsi Singkat",
+            "brand": "Merek"
+        }
+    },
+    "twitter": {
+        "follow": "Ikuti",
+        "tweetTo": "Tweet ke",
+        "tweetBy": "Tweet oleh"
+    },
+    "summary": {
+        "title": "Ringkasan",
+        "tax": "Pajak",
+        "storeCredit": "Kredit toko",
+        "rewardPoint": "Poin reward",
+        "giftCard": "Gift card (hadiah)"
+    },
+    "label": {
+        "invalidPrice": "Harga tidak valid",
+        "seeMore": "Lihat Selebihnya",
+        "seeLess": "Lihat Sedikitnya",
+        "chooseFile": "Pilih File",
+        "pleaseWait": "Mohon Menunggu",
+        "addToWishlist": "Tambahkan Favorit",
+        "addToCompare": "Tambahkan Komparasi",
+        "allItems": "Semua Barang",
+        "egJohnDoe": "Contoh: John Doe",
+        "addReviewTitle": "Masukkan Judul Ulasan",
+        "addReview": "Masukkan Ulasan",
+        "writeReview": "Tulis Ulasan",
+        "detail": "Detail",
+        "moreInfo": "Info Selebihnya",
+        "shareToYourFriend": "Bagian kepada teman dan keluarga Anda!",
+        "showMore": "Lihat Selengkapnya",
+        "showLess": "Lihat Sedikitnya",
+        "show":"Lihat",
+        "items": "Barang",
+        "data": "Data",
+        "action": "Aksi",
+        "selectProduct": "Pilih Produk",
+        "preview": "Pratinjau",
+        "giftCard": "Kartu Hadiah",
+        "giftCardCode": "Kode Kartu Hadiah",
+        "to": "Kepada",
+        "from": "Dari",
+        "value": "Nilai",
+        "shopNow": "Belanja Sekarang",
+        "applyShopNow": "Terapkan di halaman keranjang belanja.",
+        "customize": "Penyesuaian",
+        "trailer": "Trailer",
+        "viewSample": "Lihat Contoh",
+        "loading": "Memuat",
+        "all": "Semua",
+        "total": "Total",
+        "remove": "Hapus",
+        "apply": "Terapkan",
+        "privacyPolicy": "Kebijakan Privasi",
+        "termCondition": "Syarat & Ketentuan"
+    },
+    "cms": {
+        "unableToRender": "Gagal menampilkan konten"
+    }
+}

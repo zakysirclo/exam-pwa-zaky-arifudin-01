@@ -1,0 +1,39 @@
+From b835f449a80013d5db155a63f58f5af4c4384d0f Mon Sep 17 00:00:00 2001
+From: noerayyu <noer.ayu@sirclo.com>
+Date: Thu, 8 Dec 2022 13:45:17 +0700
+Subject: [PATCH] fix([28950603] helpers - currency):fix locale doesnt match
+ with magento)
+
+---
+ core/helpers/currency.js                                      | 2 +-
+ .../pages/account/components/Customer/view/desktop/order.js   | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/core/helpers/currency.js b/core/helpers/currency.js
+index b1bcac087..2069c5622 100644
+--- a/core/helpers/currency.js
++++ b/core/helpers/currency.js
+@@ -41,7 +41,7 @@ export const formatPrice = (value, currency = general.defaultCurrencyCode, curre
+     let enableRemoveDecimal = false;
+     // set locale from storeConfig -> locale if exists, otherwise use default locale set in swift.config.js
+     if (currencyCache) {
+-        localeConfig = currencyCache.locale;
++        localeConfig = currencyCache.locale.replace('_', '-');
+         enableRemoveDecimal = currencyCache.enableRemoveDecimal;
+     }
+     /**
+diff --git a/core/modules/customer/pages/account/components/Customer/view/desktop/order.js b/core/modules/customer/pages/account/components/Customer/view/desktop/order.js
+index be8e0534f..4fdd78615 100644
+--- a/core/modules/customer/pages/account/components/Customer/view/desktop/order.js
++++ b/core/modules/customer/pages/account/components/Customer/view/desktop/order.js
+@@ -17,8 +17,8 @@ const OrderView = (props) => {
+     const {
+         customerOrders, styles, t, reOrder,
+     } = props;
+-    const customerData = JSON.parse(Cookies.get('cdt'));
+-    const currencyData = JSON.parse(Cookies.get('app_currency'));
++    const customerData = Cookies.get('cdt') && JSON.parse(Cookies.get('cdt'));
++    const currencyData = Cookies.get('app_currency') && JSON.parse(Cookies.get('app_currency'));
+     return (
+         <>
+             <h2 className={styles.infoTitle}>

@@ -1,0 +1,56 @@
+module.exports = {
+    env: {
+        browser: true,
+        es6: true,
+        jest: true,
+    },
+    extends: ['airbnb', 'plugin:@next/next/recommended'],
+    globals: {
+        Atomics: 'readonly',
+        SharedArrayBuffer: 'readonly',
+        React: 'writable',
+        snap: true,
+    },
+    parserOptions: {
+        ecmaFeatures: {
+            jsx: true,
+        },
+        ecmaVersion: 2020,
+        sourceType: 'module',
+        allowImportExportEverywhere: false,
+        codeFrame: false,
+    },
+    plugins: ['react'],
+    rules: {
+        camelcase: 'off',
+        indent: ['error', 4],
+        'implicit-arrow-linebreak': 'off',
+        'react/react-in-jsx-scope': 'off',
+        'react/jsx-indent': ['error', 4],
+        'react/jsx-indent-props': ['error', 4],
+        'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
+        'react/jsx-props-no-spreading': 'off',
+        'react/prop-types': 0,
+        'react/no-array-index-key': 0,
+        'import/no-named-as-default': 0,
+        'max-len': ['error', { code: 150, ignoreComments: true }],
+        'jsx-a11y/anchor-is-valid': [
+            'error',
+            {
+                components: ['Link'],
+                specialLink: ['hrefLeft', 'hrefRight'],
+                aspects: ['invalidHref', 'preferButton'],
+            },
+        ],
+        'no-restricted-imports': ['error'],
+        'import/no-extraneous-dependencies': 'off',
+        'import/no-unresolved': 'off',
+        'react/forbid-prop-types': 'off',
+        'react/no-unknown-property': 'off',
+        'jsx-a11y/label-has-associated-control': 'off',
+        'linebreak-style': 'off',
+    },
+    settings: {
+        'import/ignore': 'node_modules',
+    },
+};

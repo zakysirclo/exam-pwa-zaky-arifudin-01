@@ -1,0 +1,48 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+.env
+
+# production
+/build
+
+# misc
+.DS_Store
+.vscode/
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+#sitemap
+/public/static/sitemap.xml
+
+#service worker
+/public/sw.js
+/public/sw.js.map
+/public/firebase-messaging-sw.js
+/public/install.js
+
+#storeconfig
+/generated/config.json
+/generated/currency.json
+/generated/availableStores.json
+
+#project files
+src
+
+#key
+/.github
+/.jenkins

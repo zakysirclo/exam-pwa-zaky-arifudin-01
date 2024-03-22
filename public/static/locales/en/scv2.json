@@ -1,0 +1,12 @@
+{
+    "success": {
+        "title": "Checkout Success",
+        "message": "Your checkout is successfull",
+        "waitingRedirect": "Waiting {{s}} seconds for automatically redirect to the Home Page"
+    },
+    "error": {
+        "title": "Checkout Failed",
+        "message": "Your checkout is failed!",
+        "waitingRedirect": "Waiting {{s}} seconds for automatically redirect to the Cart Page"
+    }
+}

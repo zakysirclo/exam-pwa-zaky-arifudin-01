@@ -1,0 +1,33 @@
+{
+    "pageTitle": "Keranjang Saya",
+    "counter": {
+        "text": "item di keranjang"
+    },
+    "crossell": {
+        "title": "Orang juga membeli"
+    },
+    "empty": {
+        "text": "Keranjang Anda saat ini kosong."
+    },
+    "button": {
+        "saveEdit": "Simpan",
+        "checkout": "Checkout",
+        "startShopping": "Mulai Belanja"
+    },
+    "confirmDelete": "Apakah anda yakin menghapus item ini?",
+    "deleteSuccess": "Hapus item cart berhasil",
+    "deleteFailed": "Hapus item cart gagal",
+    "updateSuccess": "Update item cart berhasil",
+    "updateFailed": "Update item cart gagal",
+    "addWishlistSuccess": "Produk berhasil ditambahkan ke wishlist",
+    "addWishlistFailed": "Produk gagal ditambahkan ke wishlist",
+    "addWishlistWithoutLogin": "Silahkan masuk untuk menambahkan produk ini ke wishlist",
+    "oos": "Stok habis",
+    "saveOrderNote": "Simpan",
+    "successSaveOrderNote": "Catatan pemesanan berhasil disimpan",
+    "failedSaveOrderNote": "Catatan pemesanan gagal disimpan",
+    "addANote": "Tambahkan catatan",
+    "itemNote": "Catatan item",
+    "maxChar": "(Maks {{maxChar.value}} karakter)",
+    "itemDetail": "Detail Barang"
+}

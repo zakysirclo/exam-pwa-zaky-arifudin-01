@@ -1,0 +1,260 @@
+{
+    "variant": "Variant",
+    "home": {
+        "logoName": "LOGO",
+        "title": "Home"
+    },
+    "product": {
+        "titleProduct": "Product Name",
+        "name": "Product"
+    },
+    "search": {
+        "title": "What are you looking for?",
+        "mainTitle": "New in Collection",
+        "backTitle": "back in stock sale",
+        "location": "Search Location",
+        "addressDetail": "Please input your address detail"
+    },
+    "button": {
+        "edit": "Edit",
+        "save": "Save",
+        "saved": "Saved",
+        "startShopping": "Start Shopping",
+        "continueShopping": "Continue Shopping",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "yes": "Yes",
+        "no": "No",
+        "checkout": "Checkout",
+        "change": "Change",
+        "login": "Login",
+        "register": "Register",
+        "send": "Submit",
+        "addAddress": "Add Address",
+        "loadMore": "Load more",
+        "clear": "Clear",
+        "verify": "Verify",
+        "shop": "SHOP NOW",
+        "sendOtp": "Send OTP",
+        "submit": "Submit",
+        "viewAll": "View All",
+        "viewItem": "View Item",
+        "close": "Close",
+        "goCheckout": "Checkout",
+        "viewandedit": "View Cart",
+        "addToCart": "Add To Cart",
+        "allowCookies": "Allow Cookies",
+        "simulateQrCode": "Simulate Qrcode Payment",
+        "submitReview": "Submit Review",
+        "apply": "Apply",
+        "remove": "Remove"
+    },
+    "cart": {
+        "myCart": "My Cart",
+        "cardTotal": "Subtotal",
+        "deleteSuccess": "Delete cart item success",
+        "deleteFailed": "Delete cart item failed",
+        "updateSuccess": "Item has been updated successfully",
+        "updateFailed": "Update cart item failed",
+        "emptyCart": "Your cart is currently empty.",
+        "oos": "Out of stock",
+        "inStock": "In stock",
+        "cartError": "Something error with your cart, please clear and try again"
+    },
+    "subtotal": "Subtotal",
+    "price": {
+        "asLowAs": "As low as",
+        "startFrom": "Starting at"
+    },
+    "qty": "Quantity",
+    "form": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "phoneNumber": "Phone Number",
+        "gender": "Gender",
+        "emailAddress": "Email Address",
+        "email": "Email",
+        "dob": "Date of Birth",
+        "confirm": "Confirm Password",
+        "currentPassword": "Current Password",
+        "state": "State/Province",
+        "region": "Region",
+        "city": "City",
+        "country": "Country",
+        "street": "Street Address",
+        "postal": "Postal Code",
+        "select": "Select One",
+        "addressDetail": "Address Detail",
+        "mapError": "Cannot load map, please check your internet connection",
+        "mapLoading": "Loading map...",
+        "maxChar": "Max. {{length}} Character"
+    },
+    "placeholder": {
+        "email": "e.g: user@gmail.com",
+        "firstName": "e.g: John Doe",
+        "lastName": "e.g: Doe"
+    },
+    "title": {
+        "qty": "Quantity",
+        "color": "Color",
+        "size": "Size",
+        "shortFilter": "Sort & Filter",
+        "short": "Sort By",
+        "search": "Search ...",
+        "brand": "Brand",
+        "category": "Category",
+        "summary": "Order summary",
+        "price": "Price",
+        "shortQty": "Qty",
+        "action": "Action",
+        "extraFee": "Extra Fee",
+        "relatedProduct": "People also buy",
+        "sale": "Sale",
+        "new": "New",
+        "free": "Free",
+        "none": "None",
+        "note": "Note",
+        "sku": "SKU"
+    },
+    "error": {
+        "notFound": "Data not found",
+        "fileReject": "Cannot upload, Files must be a type ",
+        "fetchError": "Connection Error. Please try again later.",
+        "browser": "Browser not supported",
+        "videoNotSupported": "Your browser does not support the video tag.",
+        "captcha": "Recaptcha verification failed, please try again.",
+        "wentWrong": "Something went wrong. Please try again later.",
+        "webpNotSupported": "Your web browser does not support WebP image format. Please consider upgrading your web browser to have better experience viewing the website."
+    },
+    "fileUpload": {
+        "reject": "Cannot upload, Files must be a type ",
+        "dragActive": "Drop the files here",
+        "dragNonActive": "Drop or Drag files here",
+        "maxSizeImage": "Maximum size image "
+    },
+    "menu": {
+        "confirmpayment": "Confirm Payment",
+        "trackingorder": "Tracking Order",
+        "sign": "Login",
+        "register": "Register",
+        "account": "Account",
+        "or": "or",
+        "notification": "Notification",
+        "myaccount": "My Account",
+        "mywishlist": "My Wishlist",
+        "signout": "Sign Out",
+        "loading": "Loading",
+        "others": "Others"
+    },
+    "header": {
+        "welcome": "Welcome!",
+        "hi": "Hi, $!",
+        "downloadApps": "Download Apps"
+    },
+    "message": {
+        "feedSuccess": "Product success added to wishlist",
+        "feedFailed": "Add to wishlist failed",
+        "browserError": "Please change browsers or check cookie settings, javascript settings or others",
+        "restrictionCookies": "We use cookies to make your experience better. To comply with the new e-Privacy directive, we need to ask for your consent to set the cookies. Learn more.",
+        "selectOptionFailed": "Please select product options first"
+    },
+    "newsletter": {
+        "title": "SIGN UP NEWSLETTER",
+        "placeholder": "Enter your email address",
+        "buttonLabel": "Subscribe",
+        "emailFormat": "Invalid email format",
+        "emptyValue": "Please insert email address",
+        "firstname": "Enter your firstname",
+        "lastname": "Enter your lastname",
+        "required": "Email is required",
+        "wrong": "Email is not valid"
+    },
+    "setting": {
+        "title": "Setting",
+        "language": "Language",
+        "store": "Store",
+        "currency": "Currency",
+        "changeto": "Change to"
+    },
+    "recentlyView": {
+        "title" : "Recently Viewed"
+    },
+    "instagramFeed": {
+        "shareFb": "Share on facebook",
+        "tweet": "Tweet",
+        "pinit": "Pin it",
+        "downloadImage": "Download image"
+    },
+    "productCompare": {
+        "title": "Product Compare",
+        "successCompare" : "Product added successfully",
+        "failedCompare" : "Product failed to add",
+        "existProduct" : "The product is already in the compare cart",
+        "emptyCompare": "Your compare list is empty",
+        "successRemove": "Product compare was deleted successfully",
+        "failedRemove": "Product compare failed to delete",
+        "label": {
+            "sku": "sku",
+            "description": "Description",
+            "shortDescription": "Short Description",
+            "brand": "Brand"
+        }
+    },
+    "twitter": {
+        "follow": "Follow",
+        "tweetTo": "Tweet to",
+        "tweetBy": "Tweet by"
+    },
+    "summary": {
+        "title": "Summary",
+        "tax": "Tax",
+        "storeCredit": "Store credit",
+        "rewardPoint": "Reward point",
+        "giftCard": "Gift card"
+    },
+    "label": {
+        "invalidPrice": "Invalid Price",
+        "seeMore": "See More",
+        "seeLess": "See Less",
+        "chooseFile": "Choose File",
+        "pleaseWait": "Please Wait",
+        "addToWishlist": "Add to Wishlist",
+        "addToCompare": "Add to Compare",
+        "allItems": "All Item",
+        "egJohnDoe": "e.g John Doe",
+        "addReviewTitle": "Add Review Title",
+        "addReview": "Add Review",
+        "writeReview": "Write Review",
+        "detail": "Description",
+        "moreInfo": "Addional Information",
+        "shareToYourFriend": "Share to your friend and family!",
+        "showMore": "Show More",
+        "showLess": "Show Less",
+        "show":"Show",
+        "items": "Item(s)",
+        "data": "Data",
+        "action": "Action",
+        "selectProduct": "Select Product",
+        "preview": "Preview",
+        "giftCard": "Gift Card",
+        "giftCardCode": "Gift Card Code",
+        "to": "To",
+        "from": "From",
+        "value": "Value",
+        "shopNow": "Shop Now",
+        "applyShopNow": "Apply on shopping cart page.",
+        "customize": "Customize",
+        "trailer": "Trailer",
+        "viewSample": "View Sample",
+        "loading": "Loading",
+        "all": "All",
+        "total": "Total",
+        "remove": "Remove",
+        "apply": "Apply",
+        "privacyPolicy": "Privacy Policy",
+        "termCondition": "Term & Conditions"
+    },
+    "cms": {
+        "unableToRender": "Unable to render the content"
+    }
+}

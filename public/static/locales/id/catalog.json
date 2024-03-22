@@ -1,0 +1,36 @@
+{
+    "emptyProductSearchResult": "Kami tidak dapat menemukan produk yang sesuai dengan pilihan.",
+    "title": {
+        "color": "Warna",
+        "size": "Ukuran",
+        "shortFilter": "Urutan & Filter",
+        "short": "Urutkan dari",
+        "search": "Pencarian ...",
+        "brand": "Brand",
+        "category": "Kategory",
+        "searchResult": "Hasil pencarian",
+        "quickView": "Tampilan Cepat"
+    },
+    "button": {
+        "save": "Simpan",
+        "clear": "Bersihkan",
+        "addToWishlist": "Tambahkan ke wishlist",
+        "addToCompare": "Tambahkan ke pembanding"
+    },
+    "product": {
+        "title_product": "Nama produk",
+        "name": "Produk"
+    },
+    "wishlist": {
+        "addWithoutLogin": "Silahkan masuk untuk menambahkan produk ini ke wishlist"
+    },
+    "filter": {
+        "title": "Pilihan Belanja",
+        "viewAs": "Lihat Sebagai",
+        "showMore": "Tampilkan lebih banyak",
+        "lessMore": "Tampilkan lebih sedikit",
+        "others": "Lainya",
+        "reset": "Setel Ulang",
+        "viewResult": "Lihat Hasil"
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "description": "Deskripsi",
+    "share": "Bagikan",
+    "popularProducts": "Produk Terpopuler",
+    "allProducts": "Semua Produk",
+    "address": "Alamat",
+    "notFound": "Penjual tidak ditemukan",
+    "home": "Beranda",
+    "product": "Produk",
+    "storeFront": "Etalase Toko",
+    "button": {
+        "about": "Tentang",
+        "chat": "Pesan"
+    }
+}

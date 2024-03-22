@@ -1,0 +1,15 @@
+FROM node:18
+RUN npm install pm2 -g;
+
+# Key for copy source code
+COPY .jenkins/git/ssh_config /root/.ssh/config
+COPY .jenkins/git/git_rsa /root/.ssh/git_rsa
+RUN chmod 600 /root/.ssh/*
+
+WORKDIR /usr/src/app
+COPY . .
+RUN yarn install
+
+# Patch pwa
+RUN sh patch.sh
+EXPOSE 3000

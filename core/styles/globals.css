@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+    body {
+        @apply text-base leading-base text-neutral
+    }
+}
+
+@layer components {
+    .prose {
+        @apply text-base leading-base text-neutral max-w-none
+    }
+
+    .prose > p > a {
+        @apply font-normal text-base leading-base text-neutral
+    }
+
+    .prose a :where(img):not(:where([class~="not-prose"],[class~="not-prose"])) {
+        @apply m-0 inline-block
+    }
+}
+
+/* Google maps style required */
+.pac-container {
+    z-index: 1300;
+    border: 1px solid #f0f0f0;
+    background: #ffffff;
+    box-shadow: none;
+    
+}
+
+/* Tweak accordion on safari */
+summary::-webkit-details-marker { 
+    display: none; 
+}

@@ -1,0 +1,23 @@
+.buildkite
+.ipynb_checkpoints/*
+*.sample
+/notebooks/*
+/unused/*
+Dockerfile
+.DS_Store
+*.md
+env.*
+/devops/*
+clearcloudfront.sh
+clearvarnish.sh
+deploy_local.sh
+deploy_prd.sh
+redeploy.sh
+zero.sh
+# To prevent storing dev/temporary container data
+/tmp/*
+*.png
+*.jpg
+generated/*
+.gitignore
+.git

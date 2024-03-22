@@ -1,0 +1,37 @@
+{
+    "emptyProductSearchResult": "We can't find products matching the selection.",
+    "title": {
+        "color": "Color",
+        "size": "Size",
+        "shortFilter": "Sort & Filter",
+        "short": "Sort by",
+        "search": "Search ...",
+        "brand": "Brand",
+        "category": "Category",
+        "searchResult": "Search result",
+        "quickView": "Quick View"
+    },
+    "button": {
+        "save": "Save",
+        "clear": "Clear",
+        "addToWishlist": "Add to wishlist",
+        "addToCompare": "Add to compare"
+    },
+    "product": {
+        "title_product": "Name product",
+        "name": "Product"
+    },
+    "wishlist": {
+        "addWithoutLogin": "Please login to add this item to your wishlist"
+    },
+    "filter": {
+        "title": "Shopping options",
+        "viewAs": "View As",
+        "showMore": "Show more",
+        "lessMore": "Show Less",
+        "others": "Others",
+        "reset": "Reset Filter",
+        "viewResult": "View Result"
+    }
+
+}

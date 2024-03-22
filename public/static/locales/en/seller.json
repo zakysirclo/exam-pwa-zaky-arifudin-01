@@ -1,0 +1,15 @@
+{
+    "description": "Description",
+    "share": "Share",
+    "popularProducts": "Popular Products",
+    "allProducts": "All Products",
+    "address": "Address",
+    "notFound": "Seller not found.",
+    "home": "Home",
+    "product": "Products",
+    "storeFront": "Etalase",
+    "button": {
+        "about": "About",
+        "chat": "Chat"
+    }
+}
