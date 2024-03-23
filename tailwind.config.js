@@ -1,7 +1,7 @@
 /* eslint-disable global-require */
 import {
     BREAKPOINTS, COLORS, FONT_FAMILY, FONT_SIZE, LINE_HEIGHT, SPACING, ZINDEX,
-} from './core/theme/vars';
+} from './src/theme/vars';
 
 const plugin = require('tailwindcss/plugin');
 
@@ -42,7 +42,8 @@ module.exports = {
                 },
                 // END store config value
                 primary: COLORS.primary,
-                secondary: COLORS.secondary,
+                base: COLORS.base,
+                // secondary: COLORS.secondary,
                 neutral: COLORS.neutral,
             },
             lineHeight: LINE_HEIGHT,
@@ -110,6 +111,17 @@ module.exports = {
             md: `${BREAKPOINTS.md}px`,
             lg: `${BREAKPOINTS.lg}px`,
             xl: `${BREAKPOINTS.xl}px`,
+            // mobile: {
+            //     min: `0px`,
+            //     max: `${BREAKPOINTS.md - 1}px`,
+            // },
+            // tablet: {
+            //     min: `${BREAKPOINTS.md}px`,
+            //     max: `${BREAKPOINTS.xl - 1}px`,
+            // },
+            // desktop: {
+            //     min: `${BREAKPOINTS.xl}px`,
+            // },
             mobile: `${BREAKPOINTS.xs}px`,
             tablet: `${BREAKPOINTS.md}px`,
             desktop: `${BREAKPOINTS.xl}px`,
